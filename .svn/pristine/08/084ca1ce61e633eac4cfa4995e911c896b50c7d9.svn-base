@@ -1,0 +1,29 @@
+package com.xuyurepos.dao.manager;
+
+import java.util.List;
+
+import com.xuyurepos.entity.manager.ImportTemp;
+/**
+ * 临时表导入
+ * @author yangfei
+ *
+ */
+public interface ImportTempDao {
+	/**
+	 * 批量删除
+	 */
+    public void truncateTable();
+    
+	/**
+	 * 添加数据
+	 * @param systemUser
+	 */
+	public void insert(ImportTemp importTemp);
+	
+	/**
+	 * 批量添加
+	 * @param list
+	 */
+	public void insertByBatch(List<ImportTemp> list);
+
+}

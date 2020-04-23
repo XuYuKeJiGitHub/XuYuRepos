@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper  
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuyurepos.dao.quartz.QuartzJobDao">
+	<cache></cache>
+	<resultMap type="com.xuyurepos.vo.quartzJob.QuartzJobDto" id="quartzJobDto">
+		<!-- column存数据库中的属性   property存javabean中数据-->
+		<result column="ID" property="id"/>
+		<result column="ASYNC_BATCH_NO" property="batchNo"/>
+		<result column="ASYNC_TYPE" property="asyncType"/>
+		<result column="ASYNC_NAME" property="asyncName"/>
+		<result column="ASYNC_FLAG" property="asyncFlag"/>
+	</resultMap>
+	
+	 <select id="getQuartzJob" parameterType="String" resultType="com.xuyurepos.vo.quartzJob.QuartzJobDto">
+          select id,async_batch_no,async_type,async_name,async_Flag from XUYU_ASYNC_JOBTASK a where async_type=#{asyncType} and async_flag='01'
+         	 and not exists(select 1 from XUYU_ASYNC_JOBTASK b where a.async_type=b.async_type and b.async_Flag='02')
+         	 LIMIT 1
+    </select>
+    
+    <update id="updateAsyncJobTask" parameterType="com.xuyurepos.vo.quartzJob.QuartzJobDto">
+    		update XUYU_ASYNC_JOBTASK a set async_flag=#{asyncFlag},UPDATE_DATE=SYSDATE() where id=#{id}
+    </update>
+     
+     <insert id="saveAsyncJobTask" parameterType="com.xuyurepos.vo.quartzJob.QuartzJobDto">
+          insert into XUYU_ASYNC_JOBTASK
+			(
+			id,
+			async_batch_no,
+			async_type,
+			async_name,
+			async_flag,
+			CREATE_DATE,
+			CREATE_USER,
+			UPDATE_DATE,
+			UPDATE_USER
+			)
+          values(
+           #{id,javaType=String}
+          ,#{batchNo,javaType=String}
+          ,#{asyncType,javaType=String}
+          ,#{asyncName,javaType=String}
+          ,#{asyncFlag,javaType=String}
+          ,SYSDATE()
+          ,'system'
+          ,SYSDATE()
+          ,'system'
+          )          
+     </insert>
+     
+   	<insert id="saveUploadFile" parameterType="com.xuyurepos.vo.common.UploadFileDto">
+	   	insert into SYSTEM_ANNEXE(			 
+		  ANNEXE_ID,
+		  CREATE_TIME,
+		  ANNEXE_TYPE, 
+		  ANNEXE_SIZE,
+		  RELATION_INFO,
+		  RELATION_MOD,
+		  UPLOAD_USER,
+		  UPLOAD_USER_NAME,
+		  UPLOAD_PATH,
+		  UPLOAD_BATCHNO
+		)
+		values(
+			#{annexeId},
+			sysdate(),
+			#{annexeType},
+			#{annexeSize},
+			#{relationInfo},
+			#{relationMod},
+			#{uploadUser},
+			#{uploadUserName},
+			#{uploadPath},
+			#{uploadBatchNo}
+		)
+   	</insert>
+</mapper>

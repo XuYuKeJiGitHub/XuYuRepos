@@ -1,0 +1,16 @@
+package com.xuyurepos.service.system;
+
+import java.util.List;
+
+import com.xuyurepos.entity.system.SystemAnnexe;
+
+public interface SystemAnnexeService {
+	/**
+	 * 根据条件查询附件数据
+	 * @param annexe
+	 * @return
+	 */
+	public List<SystemAnnexe> getList(SystemAnnexe annexe);
+	
+
+}

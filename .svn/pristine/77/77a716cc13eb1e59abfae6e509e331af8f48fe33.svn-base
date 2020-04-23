@@ -1,0 +1,86 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="../../base.jsp"%>
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>物联卡信息管理管理</title>
+    <link type="text/css" rel="stylesheet" href="<%=request.getContextPath()%>/css/main.css">
+</head>
+<body>
+<div class="easyui-layout" data-options="fit:true" id="useBox">
+    <div data-options="region:'center',split:true">
+        <!--表格查询-->
+        <form id="queryForm" method="post">
+	        <div class="tableFind">
+	            <p>
+		            <label>接入号;</label><input type="text"/>
+		            <label>物联卡状态;</label><input type="text"/>
+		            <label>客户名称号;</label><input type="text"/>
+		            
+			            <a id="a1" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-collapse'" onclick="obj.collapse()">&nbsp;</a>
+			            <a id="a2" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-search'" onclick="obj.find()">查询</a>
+			            <a id="a3" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-redo'" onclick="obj.res()">重置</a>
+	            </p>
+	            
+	            <div id="queryMore">
+		            <p>
+			            <label>ICCID;</label><input type="text"/>
+			            <label>套餐名称;</label><select  name="sex" class="easyui-combobox"><option>1GB年卡</oprtion></select>
+			            <label>IMSI;</label><input type="text"/>
+		            </p>
+		            <p>
+			            <label>开户日期;</label><input class="easyui-datebox" data-options="sharedCalendar:'#cc'" style="width:8%;"><input style="width:8%;" class="easyui-datebox" data-options="sharedCalendar:'#cc'">
+			            <label>卡号备注;</label></label><input type="text"/>
+			            <label>群组;</label><input type="text"/>
+		            </p>
+		            <p>
+			            <label>激活日期;</label><input class="easyui-datebox" data-options="sharedCalendar:'#cc'" style="width:8%;"><input style="width:8%;" class="easyui-datebox" data-options="sharedCalendar:'#cc'">
+			            <label>沉默期到期;</label><input class="easyui-datebox" data-options="sharedCalendar:'#cc'" style="width:8%;"><input style="width:8%;" class="easyui-datebox" data-options="sharedCalendar:'#cc'">
+			            <label>到期时间;</label><input class="easyui-datebox" data-options="sharedCalendar:'#cc'" style="width:8%;"><input style="width:8%;" class="easyui-datebox" data-options="sharedCalendar:'#cc'">
+		            </p>
+		             <p>
+			            <label>本月累计使用流量;</label><select  name="sex" class="easyui-combobox" style="width:8%;"><option>大于</oprtion><option>等于</oprtion><option>小于</oprtion></select><input style="width:8%;" type="text"/>
+			            <label>本月累计使用短信;</label><select  name="sex" class="easyui-combobox" style="width:8%;" ><option>大于</oprtion><option>等于</oprtion><option>小于</oprtion></select><input style="width:8%;" type="text"/>
+			            <label>余额;</label><select  name="sex" class="easyui-combobox" style="width:8%;"><option>大于</oprtion><option>等于</oprtion><option>小于</oprtion></select><input style="width:8%;" type="text"/>
+			            
+				            <a id="a4" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-expand'" onclick="obj.expand()">&nbsp;</a>
+				            <a id="a5" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-search'" onclick="obj.find()">查询</a>
+				            <a id="a6" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-redo'" onclick="obj.res()">重置</a>
+		            </p>
+	            </div>
+	        </div>
+        </form>
+        <div id="cc" class="easyui-calendar"></div>
+        <!--表格列表-->
+        <div class="tableCon">
+            <table id="table" class="tableStyle"></table>
+            <div id="tabelBut">
+                <div>
+                    <a href="#" class="easyui-linkbutton" plain="true"  onclick="obj.export()">导出</a>
+                    <a href="#" class="easyui-linkbutton" plain="true"  onclick="obj.addBox()">发送短信</a>
+                    <a href="#" class="easyui-linkbutton" plain="true"  onclick="">充值</a>
+                    <a href="#" class="easyui-linkbutton" plain="true"  onclick="">停复机</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--//新增弹出框-->
+<div id="addBox" >
+    <form id="addForm" method="post">
+        <div class="formDiv"><label>卡号:</label><input style="width:80%;height:160px;" class="easyui-textbox" name="message" data-options="multiline:true"></input></div>
+        <div class="formDiv"><label>短信内容:</label><input style="width:80%;height:160px;" class="easyui-textbox" name="message" data-options="multiline:true"></input></div>
+        <div class="forSubmint">
+            <a href="#" class="easyui-linkbutton"  iconCls="icon-ok"  onclick="obj.sum()">发送短信</a>
+            <a href="#" class="easyui-linkbutton"  iconCls="icon-ok"  onclick="obj.sum()">查看短信记录</a>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+var bathPath="<%=basePath%>";
+</script>
+<script src=iccidManager.js></script>
+
+
+</body>
+</html>

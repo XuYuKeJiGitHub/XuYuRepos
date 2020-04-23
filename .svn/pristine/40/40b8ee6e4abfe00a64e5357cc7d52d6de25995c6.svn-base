@@ -1,0 +1,13 @@
+package com.xuyurepos.service.manager;
+
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+public interface XuyuContentCardInfoImportService {
+
+	public Map<String, Object> exportModel();
+
+	public void setMark(HttpServletRequest request);
+
+}

@@ -1,0 +1,177 @@
+/**
+ * Created by Administrator on 2017/11/8.
+ */
+// 加载树
+$(function () {
+	    // 回车事件
+	    $(document).keydown(function (event) {
+	       if (event.keyCode == 13) {
+	         $('#btnQuery').triggerHandler('click');
+	       }
+	     });
+	    
+        $("#availableTypeQuery").combobox({
+            url: basePath+'/systemlookupitem/lookUp?fLookUpId=AVAILABLE_TYPE',
+            method : "post",
+            valueField: 'value',
+            textField: 'text',
+            selected: 'selected'
+         });
+	    
+	    var height= document.body.clientHeight-105;
+        // 加载表格
+        $("#table").datagrid({
+                title:"数据列表",
+                url:'',
+                loadMsg:"正在加载数据...",
+                fitColumns:true,
+                striped:true,
+                pagination:true,
+                width:'100%',
+                rownumbers:true,
+                pageNumber:1,
+                nowrap:true,
+                height:height,
+                sortName:'id',
+                checkOnSelect:true,
+                sortOrder:'asc',
+                toolbar: '#tabelBut',
+                columns:[[
+                        {
+                       	    checkbox:true,
+                            field:'no',
+                            width:100,
+                            align:'center'
+                        },
+                        {
+                    	    hidden:true,
+                            field:'id',
+                            title:'编号',
+                            width:100,
+                            align:'center'
+                        },
+                        {
+                            field:'accessNum',
+                            title:'接入号',
+                            width:100,
+                            align:'center'
+                        },
+                        {
+	                    	 field:'totalGprs',
+	                         title:'充值流量',
+	                         width:100,
+	                         align:'center',
+	                         formatter:function (val,row) {
+	                        	if(val>=1024){
+                            		val=val/1024
+                            		return val+"GB"
+                            	}else{
+                            		return val+"MB";
+                            	}
+	                         }
+                        },
+                        {
+                        	field:'comboType',
+                            title:'有效期',
+                            width:100,
+                            align:'center',
+                            formatter:function (val,row) {
+                        		var state="";
+                        		var fields=$("#availableTypeQuery").combobox('getData');
+                        		$.each(fields,function(k,v){
+                        			if(v.value==val){
+                        				state=v.text;
+                        			}
+                        		})
+                                return state;
+                            }
+                        },
+                        {
+                            field:'money',
+                            title:'充值金额',
+                            width:100,
+                            align:'center'
+                        },
+                        {
+                        	field:'createDate',
+                            title:'充值时间',
+                            width:100,
+                            align:'center'
+                        },{
+                        	field:'createUser',
+                            title:'操作人账号',
+                            width:100,
+                            align:'center'
+                        },{
+                            field:'yc',
+                            title:'预充值',
+                            width:100,
+                            align:'center'
+                        }
+                ]]
+        })
+        
+        var p = $('#table').datagrid('getPager');
+        $(p).pagination({
+        	pageSize: 10,//每页显示的记录条数，默认为10
+            pageList: [10,20,50,100],//可以设置每页记录条数的列表
+            beforePageText: '第',//页数文本框前显示的汉字
+            afterPageText: '页    共 {pages} 页',
+            displayMsg: '共 {total} 条记录',
+            onSelectPage: function (pageNumber, pageSize) {//分页触发
+                find(pageNumber, pageSize);
+            }
+        });
+        
+        function find(pageNumber, pageSize)
+        {
+                $("#table").datagrid('getPager').pagination({pageSize : pageSize, pageNumber : pageNumber});//重置
+                $("#table").datagrid("loading"); //加屏蔽
+                $.ajax({
+                    type : "POST",
+                    dataType : "json",
+                    url:basePath+'/xuyurecharge/findList',
+                    data : {
+                    	accessNum : $.trim($("#accessNumQuery").textbox('getValue')),
+                  	    createUser: $.trim($("#createUserQuery").textbox('getValue')),
+                  	    createDateStart:$.trim($("#createDateStartQuery").datebox("getValue")),
+                  	    createDateEnd:$.trim($("#createDateEndQuery").datebox("getValue")),
+                  	    accessNumStart:$.trim($("#accessNumStartQuery").textbox('getValue')),
+                  	    accessNumEnd:$.trim($("#accessNumEndQuery").textbox('getValue')),
+                        pageNumber : pageNumber,
+                        pageSize : pageSize
+                    },
+                    success : function(data) {
+                        $("#table").datagrid('loadData',data);
+                        $("#table").datagrid("loaded"); //移除屏蔽
+                    },
+                    error : function(err) {
+                        $.messager.alert('操作提示', '获取信息失败...请联系管理员!', 'error');
+                        $("#table").datagrid("loaded"); //移除屏蔽
+                    }
+                });
+
+        }
+        
+        obj.find();
+
+})
+obj={
+        // 查询
+        find:function () {
+	        	 var opts = $("#table").datagrid("options");
+	             opts.url = basePath+'/xuyurecharge/findList';
+                  $("#table").datagrid('load',{
+                	  accessNum : $.trim($("#accessNumQuery").textbox('getValue')),
+                	  createUser: $.trim($("#createUserQuery").textbox('getValue')),
+                	  createDateStart:$.trim($("#createDateStartQuery").datebox("getValue")),
+                	  createDateEnd:$.trim($("#createDateEndQuery").datebox("getValue")),
+                	  accessNumStart:$.trim($("#accessNumStartQuery").textbox('getValue')),
+                	  accessNumEnd:$.trim($("#accessNumEndQuery").textbox('getValue'))
+                  })
+        },
+        queryRes:function(){
+        	 $("#queryForm").form('reset');
+        }
+}
+

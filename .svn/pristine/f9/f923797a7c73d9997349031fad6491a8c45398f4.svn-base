@@ -1,0 +1,59 @@
+package com.xuyurepos.vo.system;
+
+import java.io.Serializable;
+
+/**
+ * vo对象
+ * @author yangfei
+ *
+ */
+@SuppressWarnings("serial")
+public class SystemUserVo implements Serializable{
+	private int id;
+	private String userName;
+	private String cname;
+	private String sex;
+	private String email;
+	private String mobile;
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	public String getUserName() {
+		return userName;
+	}
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+	public String getCname() {
+		return cname;
+	}
+	public void setCname(String cname) {
+		this.cname = cname;
+	}
+	public String getSex() {
+		return sex;
+	}
+	public void setSex(String sex) {
+		this.sex = sex;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
+	public String getMobile() {
+		return mobile;
+	}
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+	@Override
+	public String toString() {
+		return "SystemUserVo [id=" + id + ", userName=" + userName + ", cname=" + cname + ", sex=" + sex + ", email="
+				+ email + ", mobile=" + mobile + "]";
+	}
+}

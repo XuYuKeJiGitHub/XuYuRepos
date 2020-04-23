@@ -1,0 +1,47 @@
+package com.xuyurepos.dao.manager;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.xuyurepos.common.page.PageModel;
+import com.xuyurepos.entity.manager.XuyuContentCardMgr;
+
+public interface XuyuContentCardMgrDao {
+	/**
+	 * 将导入临时表的数据插入目标表
+	 * @param operator 运营商
+	 * @param batchNo  关联id
+	 */
+	public void insertYd(@Param("operator")String operator,@Param("batchNo")String batchNo);
+	/**
+	 * 将导入临时表的数据插入目标表
+	 * @param operator 运营商
+	 * @param batchNo  关联id
+	 */
+	public void insertLt(@Param("operator")String operator,@Param("batchNo")String batchNo);
+	/**
+	 * 将导入临时表的数据插入目标表
+	 * @param operator 运营商
+	 * @param batchNo  关联id
+	 */
+	public void insertDx(@Param("operator")String operator,@Param("batchNo")String batchNo);
+	
+	@SuppressWarnings("rawtypes")
+	public List selectUserListWithPage(PageModel pageModel);
+	@SuppressWarnings("rawtypes")
+	public Integer selectUserCountWithPage(PageModel pageModel);
+	
+	public XuyuContentCardMgr find(Integer id);
+	
+	/**
+	 * 卡出库的查询
+	 * @param pageModel
+	 * @return
+	 */
+	@SuppressWarnings("rawtypes")
+	public List selectListWithPage(PageModel pageModel);
+	@SuppressWarnings("rawtypes")
+	public Integer selectCountWithPage(PageModel pageModel);
+	
+}

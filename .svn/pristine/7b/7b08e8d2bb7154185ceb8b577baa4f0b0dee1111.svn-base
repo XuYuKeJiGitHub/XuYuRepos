@@ -1,0 +1,107 @@
+package com.xuyurepos.service.impl.payment;
+
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.xuyurepos.common.constants.SystemConstants;
+import com.xuyurepos.common.exception.CustomException;
+import com.xuyurepos.dao.manager.XuyuContentCardInfoDao;
+import com.xuyurepos.entity.manager.XuyuContentCardInfo;
+import com.xuyurepos.service.payment.AlipayService;
+import com.xuyurepos.service.payment.XuyuRechargeService;
+import com.xuyurepos.vo.payment.XuyuRechargeResultVo;
+import com.xuyurepos.vo.payment.XuyuRechargeVo;
+@Service
+@Transactional
+public class AlipayServiceImpl implements AlipayService{
+	
+	@Resource
+	private XuyuContentCardInfoDao xuyuContentCardInfoDao;
+	
+	@Resource
+	private XuyuRechargeService xuyuRechargeService; 
+	
+	@javax.annotation.Resource
+	private SqlSessionFactory sqlSessionFactory;
+	
+	public Connection getCon() {  
+	    Connection connection = null;  
+	    SqlSession sqlSession = sqlSessionFactory.openSession();  
+	    connection = sqlSession.getConnection();  
+	    return connection;  
+	} 
+    
+	/**
+	 * 判断值是否正确
+	 * @throws CustomException 
+	 */
+	@Override
+	public Boolean checkNums(String accessNums) throws CustomException {
+		if(accessNums==null||SystemConstants.STRINGEMPTY.equals(accessNums)){
+			throw new CustomException("充值账号错误，请检查");
+		}
+		Connection conn=null;
+		try {
+			conn=getCon();
+			StringBuilder sql=new StringBuilder("");
+			sql.append(" select count(1) as a from XUYU_CONTENT_CARD_INFO t1 where t1.ACCESS_NUM='"+accessNums+"' or t1.ICCID='"+accessNums+"' or t1.IMSI='"+accessNums+"' ");
+			if(sql!=null&&!"".equals(sql.toString())){
+				Statement stmt = conn.createStatement();
+				ResultSet rs = stmt.executeQuery(sql.toString()); // 获取执行结果
+				ResultSetMetaData rsmd = rs.getMetaData(); //
+				int ra=0;
+				while (rs.next()) {
+					ra=rs.getInt("a");
+				}
+				if(ra==0){
+					return false;
+				}else{
+					return true;
+				}
+			}else{
+				return false;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+    
+	/**
+	 * 创建订单信息
+	 * @throws CustomException 
+	 */
+	@Override
+	public Map<String, Object> createOrder(String accessNums,String money) throws CustomException {
+		try {
+			// 根据查询数据获取主表信息
+			XuyuContentCardInfo xuyuContentCardInfo=xuyuContentCardInfoDao.findAny(accessNums);
+			XuyuRechargeVo xuyuRechargeVo=new XuyuRechargeVo();
+			xuyuRechargeVo.setAccessNum(xuyuContentCardInfo.getAccessNum());
+			xuyuRechargeVo.setComboType(xuyuContentCardInfo.getComboType());
+			xuyuRechargeVo.setComnoName(xuyuContentCardInfo.getComnoName());
+			xuyuRechargeVo.setMoney(BigDecimal.valueOf(Double.valueOf(money)) );
+			XuyuRechargeResultVo xuyuRechargeResultVo=xuyuRechargeService.createOrder(xuyuRechargeVo);
+		    Map<String, Object> map=new HashMap<String, Object>();
+			map.put("order", xuyuRechargeResultVo);
+			return map;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new CustomException("创建订单失败，请重试");
+		}
+		
+	}
+
+}

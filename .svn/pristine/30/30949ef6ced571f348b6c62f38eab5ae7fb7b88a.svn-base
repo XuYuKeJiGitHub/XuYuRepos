@@ -1,0 +1,152 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="../../base.jsp"%>
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>卡信息管理</title>
+    <link type="text/css" rel="stylesheet" href="<%=request.getContextPath()%>/css/main.css">
+</head>
+<body>
+<div class="easyui-layout" data-options="fit:true" id="useBox">
+    <div data-options="region:'center',split:true">
+        <!--表格查询-->
+        <form id="queryForm" method="post">
+        <div class="tableFind">
+            <p>
+	            <label>关键字;</label><input type="text"/>
+	            <label>支付类型;</label><select  name="sex" class="easyui-combobox"><option>请选择</oprtion><option>预付</oprtion><option>后付</oprtion></select>
+	            <label>运营商:</label><select  name="operator" id="operatorQuery"  editable="false" class="easyui-combobox"></select>
+	             <a id="a1" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-collapse'" onclick="obj.collapse()">&nbsp;</a>
+			     <a id="a2" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-search'" onclick="obj.find()">查询</a>
+			     <a id="a3" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-redo'" onclick="obj.queryRes()">重置</a>
+            </p>
+            
+            <div id="queryMore">
+	            <p>
+		            <label>客户名称;</label><input type="text"/>
+		            <label>套餐名称;</label>
+		                                <select  name="comboType" id="comboTypeQuery" editable="false" class="easyui-combobox"></select>
+		            <label>卡状态;</label><select class="easyui-combobox">
+	                                            <option value="">请选择</option>
+	                                            <option value="正常">正常</option>
+	                                            <option value="单向停机">单向停机</option>
+	                                            <option value="停机">停机</option>
+	                                            <option value="预销号">预销号</option>
+	                                            <option value="销号">销号</option>
+	                                            <option value="过户">过户</option>
+	                                            <option value="休眠">休眠</option>
+	                                            <option value="待激活">待激活</option>
+	                                            <option value="失败">失败</option>
+	                                        </select>
+	            </p>
+	            <p>
+		            <label>在线状态;</label><select class="easyui-combobox">
+		                                       <option value="">请选择</option> 
+		                                       <option value="工作中">在线</option>
+		                                        <option value="空闲">离线</option>
+		                                   </select>
+		            <label>GPRS管控;</label><select class="easyui-combobox">
+		                                       <option value="">请选择</option> 
+		                                       <option value="工作中">是</option>
+		                                        <option value="空闲">否</option>
+		                                   </select>
+		            <label>流量使用;</label><select class="easyui-combobox">
+		                                        <option value="">请选择</option>
+		                                        <option value="0.3">超30%</option> 
+		                                        <option value="0.5">超50%</option>
+		                                        <option value="0.8">超80%</option>
+		                                        <option value="0.9">超90%</option>
+		                                        <option value="0.95">超95%</option>
+		                                        <option value="1">超100%</option>
+		                                   </select>
+	            </p>
+	            <p>
+		            <label>开户日期;</label>
+				            <input style="width:8%;" class="easyui-datebox" data-options="sharedCalendar:'#cc'" id="realEstablishStartQuery">
+				            <input style="width:8%;" class="easyui-datebox" data-options="sharedCalendar:'#cc'" id="realEstablishEndQuery">
+		            <label>激活日期;</label>
+				            <input style="width:8%;" class="easyui-datebox" data-options="sharedCalendar:'#cc'" id="realActivateStartQuery">
+				            <input style="width:8%;" class="easyui-datebox" data-options="sharedCalendar:'#cc'" id="realActivateEndQuery">
+		            <label>到期日期;</label>
+		                    <input style="width:8%;" class="easyui-datebox" data-options="sharedCalendar:'#cc'" >
+				            <input style="width:8%;" class="easyui-datebox" data-options="sharedCalendar:'#cc'" >
+	            </p>
+	             <p>
+		            <label>卡段;</label> <input style="width:8%;" type="text" id="accessNumStartQuery"/>
+		                                 <input style="width:8%;" type="text" id="accessNumEndQuery"/>
+		            <label>ICCID;</label><input style="width:8%;" type="text" id="iccidStartQuery"/>
+		                                 <input style="width:8%;" type="text" id="iccidEndQuery"/>
+		            <label>IMSI;</label> <input style="width:8%;" type="text" id="imsiStartQuery"/>
+		                                 <input style="width:8%;" type="text" id="imsiEndQuery"/>
+		            <a id="a4" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-expand'" onclick="obj.expand()">&nbsp;</a>
+					            <a id="a5" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-search'" onclick="obj.find()">查询</a>
+					            <a id="a6" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-redo'" onclick="obj.queryRes()">重置</a>
+		            
+	            </p>
+            </div>
+        </div>
+        </form>
+        <div id="cc" class="easyui-calendar"></div>
+        <!--表格列表-->
+        <div class="tableCon">
+            <table id="table" class="tableStyle"></table>
+            <div id="tabelBut">
+                	<div>
+                    <a href="#" class="easyui-linkbutton" plain="true"  onclick="window.open('<%=basePath%>/csvoprate/export?filename='+'cardManagerInfo'+'&exportType=cardInfoExport', '', 'left=410,height=610, width=860, top=200,  toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no')">导出</a>
+                    <a href="#" class="easyui-linkbutton" plain="true"  onclick="obj.addBox()">发送短信</a>
+                    <a href="#" class="easyui-linkbutton" plain="true"  onclick="">充值</a>
+                    <a href="#" class="easyui-linkbutton" plain="true"  onclick="obj.submitType()">数据批量导入</a>
+    				</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+ 
+<!--导入前选择运营商-->
+<div id="importTypeBox">
+      <form id="importTypeForm" method="post">
+	     <div class="formDiv"><label>运营商:</label><select  name="operator" id="operator"  style="width:465px" editable="false" class="easyui-combobox" data-options="required:true"></select><span class="formSpan">*</span></div>
+	     <div class="formDiv" id="ownerPlaceDiv"><label>二级运营商:</label><select  name="ownerPlace" id="ownerPlace"  style="width:465px" editable="false" class="easyui-combobox"></select><span class="formSpan">*</span></div>
+	     <div class="formDiv"><label>套餐:</label><select  name="comboType" id="comboType"  style="width:465px" editable="false" class="easyui-combobox" data-options="required:true"></select><span class="formSpan">*</span></div>
+	     <div class="formDiv"><label>沉默期类型:</label><select  name="waitType" id="waitType"  style="width:465px" editable="false" class="easyui-combobox"></select></div>
+	     <div class="formDiv"><label>测试期类型:</label><select  name="testType" id="testType"  style="width:465px" editable="false" class="easyui-combobox"></select></div>
+	     <div class="formDiv"><label>卡种:</label><select  name="cardType" id="cardType"  style="width:465px" editable="false" class="easyui-combobox"></select></div>
+	     <div class="formDiv"><label>规格:</label><select  name="standard" id="standard"  style="width:465px" editable="false" class="easyui-combobox"></select></div>
+	     <div class="forSubmint">
+	            <a href="#" class="easyui-linkbutton"  iconCls="icon-ok"  onclick="obj.import1()">确定</a>
+	      </div>
+      </form>
+</div>    	
+<!--//导入弹出框-->
+<div id="importBox" >
+  			<form id="importForm"  action="<%=basePath%>/csvoprate/upload" enctype="multipart/form-data" method="post">
+		        	<div class="formDiv">
+			            <tr>
+			                <td><input type="file" name="name" style="width: 60%;" id="uploadFile" class="easyui-validatebox" data-options="required:true"></td><span class="formSpan">*</span>
+			                 <a href="#" class="easyui-linkbutton" style="width: 30%;" iconCls="icon-ok"  onclick="obj.loadModel()">模板下载</a>    
+			            </tr>
+			        </div>
+			        <div class="forSubmint">
+			            <tr><td><input value="确认导入" style="width: 30%;left:10%;" class="easyui-linkbutton" id="upFile" onclick="obj.uploadFile()" iconCls="icon-redo" ></td></tr>
+		        	</div>
+		    </form>
+</div>
+<!--//新增弹出框-->
+<div id="addBox" >
+    <form id="addForm" method="post">
+        <div class="formDiv"><label>卡号:</label><input style="width:80%;height:160px;" class="easyui-textbox" name="message" data-options="multiline:true"></input></div>
+        <div class="formDiv"><label>短信内容:</label><input style="width:80%;height:160px;" class="easyui-textbox" name="message" data-options="multiline:true"></input></div>
+        <div class="forSubmint">
+            <a href="#" class="easyui-linkbutton"  iconCls="icon-ok"  onclick="obj.sum()">发送短信</a>
+            <a href="#" class="easyui-linkbutton"  iconCls="icon-ok"  onclick="obj.sum()">查看短信记录</a>
+        </div>
+    </form>
+</div>
+ <script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery-easyui-1.7.0/src/jquery.form.js"></script>
+ <script src=cardManager.js></script>
+
+
+</body>
+</html>

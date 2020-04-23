@@ -1,0 +1,27 @@
+package com.xuyurepos.common.util.quartz;
+
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import com.xuyurepos.service.quartz.QuartzJobServer;
+import com.xuyurepos.vo.quartzJob.QuartzJobDto;
+
+public class QuartzJob{
+	 QuartzJobServer quartzJobServer;
+	
+    public void execute(){
+        // TODO Auto-generated method stub
+        System.out.println("this is my first scheduler!");
+        ApplicationContext ctx=new ClassPathXmlApplicationContext("/WEB-INF/quartz-config.xml");
+        quartzJobServer=(QuartzJobServer) ctx.getBean("quartzJobServer");
+        QuartzJobDto quartzJobDto=quartzJobServer.getQuartzJob("cardImport");
+        if(quartzJobDto!=null) {
+        	System.out.println(quartzJobDto.getBatchNo()+quartzJobDto.getAsyncFlag());
+        	quartzJobDto.setAsyncFlag("02");
+        	quartzJobServer.updateAsyncJobTask(quartzJobDto);
+        	System.out.println(quartzJobDto.getBatchNo()+quartzJobDto.getAsyncFlag());
+        }
+    }
+
+}

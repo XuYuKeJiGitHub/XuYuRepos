@@ -1,0 +1,56 @@
+package com.xuyurepos.service.intergration.cmp.facade;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.apache.commons.codec.digest.DigestUtils;
+
+import com.alibaba.fastjson.JSON;
+import com.xuyurepos.common.util.MD5Util;
+import com.xuyurepos.common.util.SecretUtils;
+import com.xuyurepos.common.util.httpclient.HttpTookit;
+import com.xuyurepos.service.intergration.cmp.sign.CMPSign;
+import com.xuyurepos.service.intergration.cmp.util.CMPSubmit;
+
+public class CMPRequest {
+
+	
+	public static  void wrap(Map map) {
+		map.put("transid", "2100199992100001922014101615303080000001");
+		map.put("appid", "210019999210000192")	;
+		map.put("ebid", "0001000000008");
+//		map.put("password","XYXX543sh");
+
+		
+	}
+	
+	
+	
+	public static void main(String[] args) {
+		Map map=new HashMap();
+		
+		wrap(map);
+//   map.put("msisdn", "0001000000009");
+		
+	 
+//	Map body=new HashMap();
+//	body.put("msisdn", "1440082636750");
+//	map.put("body",JSON.toJSONString(body));
+//	String sign=	CMPSign.sign(map);
+//	map.put("sign",sign);
+	try {
+		String token="210019999210000192"+"XYXX543sh"+"2100199992100001922014101615303080000001";
+		String md5Token=SecretUtils.getSHA256StrJava(token);
+		map.put("token", md5Token);
+		map.put("msisdn", "1440082636750");
+		// 请求 URL 举例
+		// https://api.iot.10086.cn https://api.iot.10086.cnhttps://api.iot.10086.cn https://api.iot.10086.cnhttps://api.iot.10086.cnhttps://api.iot.10086.cn https://api.iot.10086.cn https://api.iot.10086.cn https://api.iot.10086.cn /v2/gprsrealsingle?appid=xxx&transid=ebid=token=x/v2/gprsrealsingle?appid=xxx&transid=ebid=token=x/v2/gprsrealsingle?appid=xxx&transid=ebid=token=x /v2/gprsrealsingle?appid=xxx&transid=ebid=token=x /v2/gprsrealsingle?appid=xxx&transid=ebid=token=x /v2/gprsrealsingle?appid=xxx&transid=ebid=token=x /v2/gprsrealsingle?appid=xxx&transid=ebid=token=x /v2/gprsrealsingle?appid=xxx&transid=ebid=token=x /v2/gprsrealsingle?appid=xxx&transid=ebid=token=x/v2/gprsrealsingle?appid=xxx&transid=ebid=token=x/v2/gprsrealsingle?appid=xxx&transid=ebid=token=x /v2/gprsrealsingle?appid=xxx&transid=ebid=token=x /v2/gprsrealsingle?appid=xxx&transid=ebid=token=x /v2/gprsrealsingle?appid=xxx&transid=ebid=token=x /v2/gprsrealsingle?appid=xxx&transid=ebid=token=x/v2/gprsrealsingle?appid=xxx&transid=ebid=token=x/v2/gprsrealsingle?appid=xxx&transid=ebid=token=x/v2/gprsrealsingle?appid=xxx&transid=ebid=token=x /v2/gprsrealsingle?appid=xxx&transid=ebid=token=x /v2/gprsrealsingle?appid=xxx&transid=ebid=token=x /v2/gprsrealsingle?appid=xxx&transid=ebid=token=x /v2/gprsrealsingle?appid=xxx&transid=ebid=token=x /v2/gprsrealsingle?appid=xxx&transid=ebid=token=x /v2/gprsrealsingle?appid=xxx&transid=ebid=token=x /v2/gprsrealsingle?appid=xxx&transid=ebid=token=x/v2/gprsrealsingle?appid=xxx&transid=ebid=token=x /v2/gprsrealsingle?appid=xxx&transid=ebid=token=x/v2/gprsrealsingle?appid=xxx&transid=ebid=token=x/v2/gprsrealsingle?appid=xxx&transid=ebid=token=msisdn=xxx xx&msisdn=xxxxx&msisdn=xxx xx&msisdn=xxx -以 msisdnmsisdn msisdn 进行查询 进
+//	String a=	HttpTookit.doGet("http://183.230.96.66:8087/v2/gprsrealsingle", map, "UTF-8");
+	String result=CMPSubmit.buildRequestPost("","",map, "http://183.230.96.66:8087/v2/gprsrealsingle");
+	System.out.println(result);
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+	}
+}

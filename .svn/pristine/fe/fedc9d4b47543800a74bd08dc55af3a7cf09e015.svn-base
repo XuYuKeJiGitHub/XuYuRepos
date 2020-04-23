@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="makewar" name="Build">
+	<property name="warpath" value="E:\war" />
+	<property name="webroot" value="WebContent" />
+	<property name="warfile" value="E:\warfile" />
+
+	<!-- begin make the war -->
+	<target name="makewar" depends="init">
+		<echo>=======  makewar  =========</echo>
+		<mkdir dir="${warpath}" />
+		<war warfile="${warpath}/XuYuRepos.war">
+			<lib dir="${warfile}/lib" />
+			<classes dir="${warfile}/classes" />
+			<fileset dir="${warfile}/webroot">
+				<exclude name="**/*." />
+			</fileset>
+		</war>
+	</target>
+	<!-- end make the war -->
+	
+	<target name="init">
+		<echo>1.rebuild the folder</echo>
+		<delete dir="${warfile}" failonerror="false" />
+		<mkdir dir="${warfile}" />
+		<mkdir dir="${warfile}/classes" />
+		<mkdir dir="${warfile}/lib" />
+		<mkdir dir="${warfile}/webroot" />
+		<echo>2.copy the src classes</echo>
+		<copy includeemptydirs="false" todir="${warfile}/classes">
+			<fileset dir="build/classes">
+				<exclude name="**/*." />
+			</fileset>
+		</copy>
+
+		<echo>5.copy the webroot</echo>
+		<copy includeemptydirs="true" todir="${warfile}/webroot">
+			<fileset dir="${webroot}">
+				<exclude name="**/*." />
+			</fileset>
+		</copy>
+		
+	</target>
+</project>

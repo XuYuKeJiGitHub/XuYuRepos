@@ -1,0 +1,7 @@
+.alignCenter{
+	text-align: center;
+}
+.titleColor{
+	background-color: red;
+	color: black;
+}

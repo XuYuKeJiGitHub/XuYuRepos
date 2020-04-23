@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper  
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuyurepos.dao.autorule.AotoRuleManagerDao">
+	<cache></cache>
+	 <insert id="saveRule" parameterType="com.xuyurepos.vo.autorule.AutoRuleManagerDTO">
+         INSERT INTO XUYU_RULE_INFO (
+				RULE_ID,
+				RULE_TYPE,
+				RULE_VALUE,
+				GPRS,
+				RULE_DESC,
+				RULE_NAME,
+				INVALID,
+				OWNER,
+				OWNER_NAME,
+				ACCESS_NUM,
+				ACCESS_NUM_START,
+				ACCESS_NUM_END,
+				DAYS,
+				MESSAGE_PHONE,
+				MESSAGE_MAIL,
+				AFFECT_RANGE,
+				START_DATE,
+				CREATE_DATE,
+				CREATE_USER,
+				UPDATE_DATE,
+				UPDATE_USER,
+				OPRATE_TYPE 
+			)
+			VALUES(
+	          #{ruleId,javaType=String}
+	          ,#{ruleType,javaType=String}
+	          ,#{rate,javaType=DECIMAL}
+	          ,#{gprs,javaType=DECIMAL}
+	          ,#{ruleDesc,javaType=String}
+	          ,#{ruleName,javaType=String}
+	          ,'Y'
+	          ,#{ownerId,javaType=String}
+	          ,#{ownerName,javaType=String}
+	          ,#{accessNums,javaType=String}
+	          ,#{accessNumStart,javaType=String}
+	          ,#{accessNumEnd,javaType=String}
+	          ,#{days,javaType=DECIMAL}
+	          ,#{messageId,javaType=String}
+	          ,#{emailId,javaType=String}
+	          ,#{bindType,javaType=String}
+	          ,SYSDATE()
+	          ,SYSDATE()
+	          ,#{createUser,javaType=String}
+	          ,SYSDATE()
+	          ,#{createUser,javaType=String}
+	          ,#{oprateType,javaType=String}
+	          )          
+     </insert>
+     <!-- 更新自动化规则 -->
+     <update id="updateRule" parameterType="com.xuyurepos.vo.autorule.AutoRuleManagerDTO">
+     	update XUYU_RULE_INFO set INVALID='N',END_DATE=SYSDATE(),UPDATE_USER=#{createUser,javaType=String},UPDATE_DATE=SYSDATE() WHERE ID=#{id}
+     </update>
+     <!-- 暂停规则执行 -->
+     <update id="stopRule" parameterType="String">
+          	update XUYU_RULE_INFO set INVALID='N',END_DATE=SYSDATE(),UPDATE_USER=#{createUser,javaType=String},UPDATE_DATE=SYSDATE() WHERE ID=#{id}
+     </update>
+     <resultMap type="com.xuyurepos.vo.autorule.AutoRuleManagerDTO" id="autoRule">
+		<!-- column存数据库中的属性   property存javabean中数据-->
+		<id column="ID" property="id" jdbcType="VARCHAR"/>
+		<result column="RULE_ID" property="ruleId" jdbcType="VARCHAR"/>
+		<result column="RULE_NAME" property="ruleName" jdbcType="VARCHAR"/>
+		<result column="RULE_TYPE" property="ruleType" jdbcType="VARCHAR"/>
+		<result column="RULE_VALUE" property="rate" jdbcType="DECIMAL"/>
+		<result column="GPRS" property="gprs" jdbcType="DECIMAL"/>
+		<result column="DAYS" property="days" jdbcType="DECIMAL"/>
+		<result column="OWNER" property="ownerId" jdbcType="VARCHAR"/>
+		<result column="OWNER_NAME" property="ownerName" jdbcType="VARCHAR"/>
+		<result column="ACCESS_NUM" property="accessNums" jdbcType="VARCHAR"/>
+		<result column="ACCESS_NUM_START" property="accessNumStart" jdbcType="VARCHAR"/>
+		<result column="ACCESS_NUM_END" property="accessNumEnd" jdbcType="VARCHAR"/>
+		<result column="MESSAGE_PHONE" property="messageId" jdbcType="VARCHAR"/>
+		<result column="MESSAGE_MAIL" property="emailId" jdbcType="VARCHAR"/>
+		<result column="AFFECT_RANGE" property="bindType" jdbcType="VARCHAR"/>
+		<result column="CREATE_USER" property="createUser" jdbcType="VARCHAR"/>
+		<result column="CREATE_DATE" property="createDate" jdbcType="TIMESTAMP"/>
+		<result column="UPDATE_USER" property="updateUser" jdbcType="VARCHAR"/>
+		<result column="UPDATE_DATE" property="updateDate" jdbcType="TIMESTAMP"/>
+		<result column="OPRATE_TYPE" property="oprateType" jdbcType="VARCHAR"/>
+		<result column="INVALID" property="isValidate" jdbcType="VARCHAR"/>
+	</resultMap>
+	<!-- 查询规则详情 -->
+	<select id="getRuleInfo" parameterType="String" resultMap="autoRule">
+		select ID,RULE_ID,RULE_NAME,RULE_TYPE,RULE_TYPE,RULE_VALUE,GPRS,DAYS,OWNER,OWNER_NAME,ACCESS_NUM,ACCESS_NUM_START,ACCESS_NUM_END,
+		MESSAGE_PHONE,MESSAGE_MAIL,AFFECT_RANGE 
+		from XUYU_RULE_INFO where id=#{id}
+	</select>
+	
+    <sql id="sql_count">
+        SELECT COUNT(*)
+    </sql>
+    
+    <sql id="sql_select">
+        SELECT *
+    </sql>
+    
+    <sql id="sql_where">
+        FROM XUYU_RULE_INFO
+        <where>
+            <if test="queryObj != null">
+                <if test="queryObj.ruleName != null and queryObj.ruleName != ''">
+                    AND RULE_NAME like 
+                    '%${queryObj.ruleName}%'
+                </if>
+                <if test="queryObj.startDate != null and queryObj.startDate != ''">
+                	AND START_DATE  &gt;= str_to_date(#{queryObj.startDate},'%Y-%m-%d')
+                </if>
+                <if test="queryObj.endDate != null and queryObj.endDate != ''">
+                    AND START_DATE  &lt;= str_to_date(#{queryObj.endDate},'%Y-%m-%d')
+                </if>
+                 <if test="queryObj.isValidate != null and queryObj.isValidate != ''">
+                    AND INVALID =#{queryObj.isValidate}
+                </if>
+                 
+            </if>
+        </where>
+    </sql>
+    
+   <select id="selectRuleListWithPage" parameterType="com.xuyurepos.common.page.PageModel" resultMap="autoRule">
+        <include refid="sql_select"></include>
+        <include refid="sql_where"></include>
+        <if test="pageNumber != null and  pageSize!= null">
+            limit #{startRow},#{pageSize}
+        </if>
+    </select>
+
+    <select id="selectRuleCountWithPage" parameterType="com.xuyurepos.common.page.PageModel" resultType="Integer">
+        <include refid="sql_count"></include>
+        <include refid="sql_where"></include>
+    </select>
+    
+    <sql id="sql_select_log">
+        SELECT  a.ID id,
+				a.ACCESS_NUM accessNum, 
+				a.ICCID iccid,      
+				a.IMSI imsi,     
+				a.PROVIDER provider,   
+				a.OWNER_PLACE ownerPlace, 
+				a.WORKING_CONDITION workingCondition,
+				a.OWNER ownerId, 
+				a.IS_DEAL isDeal,
+				a.OPERATE_TYPE operateType, 
+				a.CREATE_USER ,
+				a.UPDATE_USER ,
+				a.CREATE_DATE ,
+				a.UPDATE_DATE, 
+				a.RULE_ID ruleId,
+			    b.RULE_NAME ruleName
+    </sql>
+    
+	
+    <sql id="sql_where_log">
+        from XUYU_CONTENT_CARD_RULE_RESULT a,XUYU_RULE_INFO b
+        <where>  a.RULE_ID=b.RULE_ID
+            <if test="queryObj != null">
+                <if test="queryObj.ruleName != null and queryObj.ruleName != ''">
+                    AND b.RULE_NAME like 
+                    '%${queryObj.ruleName}%'
+                </if>
+                <if test="queryObj.startDate != null and queryObj.startDate != ''">
+                	AND UPDATE_DATE  &gt;= str_to_date(#{queryObj.startDate},'%Y-%m-%d')
+                </if>
+                <if test="queryObj.endDate != null and queryObj.endDate != ''">
+                    AND UPDATE_DATE  &lt;= str_to_date(#{queryObj.endDate},'%Y-%m-%d')
+                </if>
+                 <if test="queryObj.operateType != null and queryObj.operateType != ''">
+                    AND operate_Type =#{queryObj.operateType}
+                </if>
+                 <if test="queryObj.isDeal != null and queryObj.isDeal!= ''">
+                    AND INVALID =#{queryObj.isDeal}
+                </if>
+                 
+            </if>
+        </where>
+    </sql>
+    
+   <select id="selectRuleLogWithPage" parameterType="com.xuyurepos.common.page.PageModel" resultType="com.xuyurepos.vo.autorule.AutoRuleLogDTO">
+        <include refid="sql_select_log"></include>
+        <include refid="sql_where_log"></include>
+        <if test="pageNumber != null and  pageSize!= null">
+            limit #{startRow},#{pageSize}
+        </if>
+    </select>
+
+    <select id="selectRuleLogCountWithPage" parameterType="com.xuyurepos.common.page.PageModel" resultType="Integer">
+        <include refid="sql_count"></include>
+        <include refid="sql_where_log"></include>
+    </select>
+    
+  
+    <sql id="sql_select_yes">
+        SELECT  a.ID id,
+				a.ACCESS_NUM accessNum, 
+				a.ICCID iccid,      
+				a.IMSI imsi,     
+				a.PROVIDER provider,   
+				a.OWNER_PLACE ownerPlace, 
+				a.AGENCY agency,
+				a.WORKING_CONDITION workingCondition,
+				a.OWNER ownerId, 
+				IFNULL(a.USE_GPRS-IFNULL((select b.USE_GPRS from  XUYU_CONTENT_CARD_INFO_IMPORT b 
+							where a.ACCESS_NUM=b.ACCESS_NUM
+							and b.DOWNLOAD_DATE=
+									DATE_ADD(a.DOWNLOAD_DATE,INTERVAL -1 day) LIMIT 1),0),0) gprsYesterDay,
+				date_format(DATE_ADD(a.DOWNLOAD_DATE,INTERVAL -1 day),'%Y-%m-%d') queryDate
+    </sql>
+    
+	
+    <sql id="sql_where_yes">
+        from XUYU_CONTENT_CARD_INFO_IMPORT a 
+        <where>  DOWNLOAD_DATE=IFNULL(DATE_ADD(date_format(#{queryObj.queryDate},'%Y-%m-%d'),INTERVAL+1 day),
+										DATE_ADD(CURRENT_DATE,INTERVAL -1 day))
+            <if test="queryObj != null">
+                <if test="queryObj.provider != null and queryObj.provider != ''">
+                    AND PROVIDER=#{queryObj.provider}
+                </if>
+                 <if test="queryObj.ownerPlace != null and queryObj.ownerPlace != ''">
+                    AND OWNER_PLACE=#{queryObj.ownerPlace}
+                </if>
+                 <if test="queryObj.agency != null and queryObj.agency != ''">
+                    AND AGENCY=#{queryObj.agency}
+                </if>
+                <if test="queryObj.ownerId != null and queryObj.ownerId != ''">
+                	AND OWNER= #{ownerId}
+                </if>
+                <if test="queryObj.queryDate != null and queryObj.queryDate != ''">
+                    AND DOWNLOAD_DATE=IFNULL(DATE_ADD(date_format(#{queryObj.queryDate},'%Y-%m-%d'),INTERVAL+1 day),
+										DATE_ADD(CURRENT_DATE,INTERVAL -1 day))
+                </if>
+                 <if test="queryObj.accessNum != null and queryObj.accessNum != ''">
+                    AND ACCESS_NUM =#{queryObj.accessNum}
+                </if>
+                 <if test="queryObj.gprsYesterday != null and queryObj.gprsYesterday!= ''">
+                    having gprsYesterDay>#{queryObj.gprsYesterday}
+                </if>
+                 
+            </if>
+        </where>
+    </sql>
+    
+   <select id="selectRuleYesWithPage" parameterType="com.xuyurepos.common.page.PageModel" resultType="com.xuyurepos.vo.autorule.AutoRuleLogDTO">
+        <include refid="sql_select_yes"></include>
+        <include refid="sql_where_yes"></include>
+        <if test="pageNumber != null and  pageSize!= null">
+            limit #{startRow},#{pageSize}
+        </if>
+    </select>
+
+    <select id="selectRuleYesCountWithPage" parameterType="com.xuyurepos.common.page.PageModel" resultType="Integer">
+        <include refid="sql_count"></include>
+        <include refid="sql_where_yes"></include>
+    </select>
+</mapper>

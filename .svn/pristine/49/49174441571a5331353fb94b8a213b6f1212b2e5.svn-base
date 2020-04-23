@@ -1,0 +1,129 @@
+package com.xuyurepos.serviceImpl.operamanager;
+
+import java.util.Date;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import com.xuyurepos.common.constants.SystemConstants;
+import com.xuyurepos.common.log.LoggerFactory;
+import com.xuyurepos.common.page.PageModel;
+import com.xuyurepos.common.util.StringUtil;
+import com.xuyurepos.dao.operamanager.XuyuPackagesDao;
+import com.xuyurepos.entity.operamanager.XuyuPackages;
+import com.xuyurepos.service.operamanager.XuyuPackagesService;
+import com.xuyurepos.vo.operamanager.XuyuPackagesVo;
+@Service
+public class XuyuPackagesServiceImpl implements XuyuPackagesService{
+	
+	
+	Logger log=LoggerFactory.getInstance().getLogger(XuyuPackagesServiceImpl.class);
+
+	@Resource
+	private XuyuPackagesDao xuyuPackagesDao;
+    
+	/**
+	 * 分页查询
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public void findList(PageModel pageModel) {
+		pageModel.setRows(xuyuPackagesDao.selectUserListWithPage(pageModel));
+	    pageModel.setTotal(xuyuPackagesDao.selectUserCountWithPage(pageModel));
+	}
+    
+	/**
+	 * 批量删除
+	 */
+	@Override
+	public void delete(String ids) {
+		if(!StringUtil.isEmpty(ids)){
+			String[] idsStr=ids.split(SystemConstants.STRING_SENT);
+			for (int i = 0; i < idsStr.length; i++) {
+				if(!StringUtil.isEmpty(idsStr[i])){
+					Integer id=Integer.valueOf(idsStr[i]);
+					XuyuPackages xuyuPackages=xuyuPackagesDao.find(id);
+					if(xuyuPackages!=null){
+						xuyuPackagesDao.del(id);
+					}
+				}
+			}
+		}
+	}
+    
+	/**
+	 * 保存数据
+	 */
+	@Override
+	public XuyuPackages saveInfo(XuyuPackagesVo xuyuPackagesVo) {
+		log.info("xuyuPackagesVo:"+xuyuPackagesVo.toString());
+		XuyuPackages xuyuPackages=new XuyuPackages();
+		if(xuyuPackagesVo!=null&&SystemConstants.STRINGEMPTY.equals(xuyuPackagesVo.getId())){
+			xuyuPackages=add(xuyuPackagesVo);
+		}else{
+			xuyuPackages=edit(xuyuPackagesVo);
+		}
+		return xuyuPackages;
+	}
+    
+	/**
+	 * 编辑数据
+	 * @param xuyuPackagesVo
+	 * @return
+	 */
+	private XuyuPackages edit(XuyuPackagesVo xuyuPackagesVo) {
+		XuyuPackages xuyuPackages=xuyuPackagesDao.find(Integer.valueOf(xuyuPackagesVo.getId()));
+		if(xuyuPackages!=null){
+			BeanUtils.copyProperties(xuyuPackagesVo, xuyuPackages);
+			log.info("xuyuPackages:"+xuyuPackages.toString());
+			xuyuPackages.setUpdateTime(new Date());
+			HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+			String order=request.getParameter("order");
+			if(order!=null&&!SystemConstants.STRINGEMPTY.equals(order)){
+				xuyuPackages.setOrder(Integer.valueOf(order));
+			}
+			xuyuPackagesDao.update(xuyuPackages);
+		}
+		return xuyuPackages;
+	} 
+    
+	/**
+	 * 添加数据
+	 * @param xuyuPackagesVo
+	 * @return
+	 */
+	private XuyuPackages add(XuyuPackagesVo xuyuPackagesVo) {
+		XuyuPackages xuyuPackages=new XuyuPackages();
+		BeanUtils.copyProperties(xuyuPackagesVo, xuyuPackages);
+		xuyuPackages.setUpdateTime(new Date());
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+		String order=request.getParameter("order");
+		if(order!=null&&!SystemConstants.STRINGEMPTY.equals(order)){
+			xuyuPackages.setOrder(Integer.valueOf(order));
+		}
+		xuyuPackagesDao.insert(xuyuPackages);
+		return xuyuPackages;
+	}
+    
+	/**
+	 * 查询数据
+	 */
+	@Override
+	public XuyuPackagesVo find(String id) {
+		XuyuPackagesVo xuyuPackagesVo=new XuyuPackagesVo();
+		if(!StringUtil.isEmpty(id)){
+			XuyuPackages xuyuPackages=xuyuPackagesDao.find(Integer.valueOf(id));
+			BeanUtils.copyProperties(xuyuPackages, xuyuPackagesVo);
+			xuyuPackagesVo.setId(id);
+			xuyuPackagesVo.setOrder(SystemConstants.STRINGEMPTY+xuyuPackages.getOrder());
+		}
+		return xuyuPackagesVo;
+	}
+
+}

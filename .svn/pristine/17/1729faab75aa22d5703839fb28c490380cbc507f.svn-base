@@ -1,0 +1,55 @@
+package com.xuyurepos.dao.manager;
+
+import java.util.HashMap;
+import java.util.List;
+
+import com.xuyurepos.common.page.PageModel;
+import com.xuyurepos.entity.manager.XuyuContentCardInfo;
+
+/**
+ * 物联卡信息数据插入
+ * @author yangfei
+ *
+ */
+public interface XuyuContentCardInfoDao {
+	
+	/**
+	 * 添加数据
+	 * @param xuyuOwnerInfo
+	 */
+	public void insert(XuyuContentCardInfo xuyuContentCardInfo);
+    
+	/**
+	 * 编辑数据
+	 * @param xuyuOwnerInfo
+	 */
+	public void update(XuyuContentCardInfo xuyuContentCardInfo);
+    
+	/**
+	 * 批量出库表
+	 * @param accessNumStart
+	 * @param accessNumEnd
+	 */
+	@SuppressWarnings("rawtypes")
+	public void insertInfo(HashMap map);
+	
+	/**
+	 * 分页查询
+	 * @param pageModel
+	 * @return
+	 */
+	@SuppressWarnings("rawtypes")
+	public List selectUserListWithPage(PageModel pageModel);
+	@SuppressWarnings("rawtypes")
+	public Integer selectUserCountWithPage(PageModel pageModel);
+	
+	public XuyuContentCardInfo find(String id);
+    
+	/**
+	 * 划卡
+	 * @param map
+	 */
+	@SuppressWarnings("rawtypes")
+	public void updateInfo(HashMap map);
+
+}

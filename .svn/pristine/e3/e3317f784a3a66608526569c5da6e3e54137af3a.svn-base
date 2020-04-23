@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+	  <meta charset="utf-8">
+	  <title>扫码支付</title>
+	  <meta name="renderer" content="webkit">
+	  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	  <link rel="stylesheet"  href="layui/css/layui.css"  media="all">
+	  <link rel="stylesheet"  href="css.css"  media="all">
+	  <link rel="stylesheet"  href="index.css"  media="all">
+	  <script src="layui/layui.all.js" charset="utf-8"></script>
+	</head>
+	<body>
+	    <legend  class="alignCenter" style="background: red;color:white;font-size: 18px;border-buttom:1px solid #000;">扫码支付</legend>
+			<div id="add-main" style="padding: 3px;">
+			  <div class="layui-card alignCenter" >
+			       <p class="qr_txt js_qr_txt">使用微信扫描二维码</p>
+	               <p class="qr_tips">请使用微信扫码支付</p>
+		           <div class="layui-card-body" style="color: blue;"><img style='width:100%; height:300px' id="wxpayAddress"></img></div>
+	         </div>
+        </div> 
+        <button class="layui-btn layui-btn-normal" style="text-align: center;margin-left: 40%;margin-top: 10px;" onclick="javascript:window.opener=null;window.open('','_self');window.close();">关闭</button>
+        <script src="../js/jquery.min-1.12.4.js"></script>
+		<script type="text/javascript">
+			(function ($) {
+			    $.getUrlParam = function (name) {
+			        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+			        var r = window.location.search.substr(1).match(reg);
+			        if (r != null) return unescape(r[2]); return null;
+			    }
+			    var code_url=$.getUrlParam("code_url");
+			    if(code_url==null){
+			    	window.close();
+			    }else{
+			    	var url="/XuYuRepos/xuyupayaddress/captcha.form?url="+code_url;
+			    	$('#wxpayAddress').attr("src",url);
+			    }
+			    
+			})(jQuery);
+		</script>
+	</body>
+</html>

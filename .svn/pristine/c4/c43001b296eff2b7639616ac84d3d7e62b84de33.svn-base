@@ -1,0 +1,50 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="../../base.jsp"%>
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>数据同步</title>
+    <link type="text/css" rel="stylesheet" href="<%=request.getContextPath()%>/css/main.css">
+</head>
+<body>
+<div class="easyui-layout" data-options="fit:true" id="useBox">
+    <div data-options="region:'center',split:true">
+        <!--表格查询-->
+        <div class="tableFind">
+             <p>
+	            <label>同步时间;</label><input style="width:8%;" type="text"/>
+	            <a id="btn" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-search'" onclick="obj.find()">查询</a>
+	            <a id="zhbtn" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-redo'" onclick="obj.find()">重置</a>
+	            
+            </p>
+        </div>
+        <!--表格列表-->
+        <div class="tableCon">
+            <table id="table" class="tableStyle"></table>
+            <div id="tabelBut">
+                <div>
+                    <a href="#" class="easyui-linkbutton" plain="true"  onclick="obj.addBox()">导入数据</a>
+                    <a href="#" class="easyui-linkbutton" plain="true"  onclick="">更新状态</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--//新增弹出框-->
+<div id="addBox" >
+    <form id="addForm" method="post">
+        <div class="formDiv"><input type="file" style="width: 80%;" class="easyui-validatebox" name="name" data-options="required:true"><span class="formSpan">*</span><a href="#" class="easyui-linkbutton" id="res" iconCls="icon-redo" onclick="obj.res()" >导入</a></div>
+        <div class="forSubmint">
+            <a href="#" class="easyui-linkbutton"  iconCls="icon-ok"  onclick="obj.sum()">模板下载</a>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+var bathPath="<%=basePath%>";
+</script>
+<script src=importdata.js></script>
+
+
+</body>
+</html>

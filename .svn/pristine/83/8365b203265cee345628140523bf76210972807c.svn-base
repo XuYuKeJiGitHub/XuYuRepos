@@ -1,0 +1,23 @@
+package com.xuyurepos.service.payment;
+
+import com.xuyurepos.common.exception.CustomException;
+import com.xuyurepos.common.page.PageModel;
+import com.xuyurepos.vo.payment.XuyuRechargeResultVo;
+import com.xuyurepos.vo.payment.XuyuRechargeVo;
+
+public interface XuyuRechargeService {
+
+	public void saveInfo(XuyuRechargeVo xuyuRechargeVo)throws Exception;
+
+	@SuppressWarnings("rawtypes")
+	public void findList(PageModel pageModel);
+
+	public XuyuRechargeResultVo createOrder(XuyuRechargeVo xuyuRechargeVo);
+	
+	public void payNotify(String out_trade_no);
+
+	public void customerFindList(PageModel pageModel);
+
+	public XuyuRechargeResultVo createOrder()throws CustomException;
+
+}

@@ -1,0 +1,178 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="../../base.jsp"%>
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>卡信息管理</title>
+    <link type="text/css" rel="stylesheet" href="<%=request.getContextPath()%>/css/main.css">
+</head>
+<body>
+<div class="easyui-layout" data-options="fit:true" id="useBox">
+    <div data-options="region:'center',split:true">
+        <!--表格查询-->
+        <div class="tableFind">
+            <p>
+	            <label>关键字;</label><input type="text"/>
+	            <label>支付类型;</label><select  name="sex" class="easyui-combobox"><option>请选择</oprtion><option>预付</oprtion><option>后付</oprtion></select>
+	             <a id="a1" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-collapse'" onclick="obj.collapse()">&nbsp;</a>
+			     <a id="a2" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-search'" onclick="obj.find()">查询</a>
+			     <a id="a3" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-redo'" onclick="obj.res()">重置</a>
+            </p>
+            
+            <div id="queryMore">
+	            <p>
+		            <label>客户名称;</label><input type="text"/>
+		            <label>套餐名称;</label>
+		                                 <select  name="sex" class="easyui-combobox">
+		                                       <option value="GPRS包年1800M套餐">GPRS包年1800M套餐</option>
+		                                       <option value="GPRS包年1G套餐">GPRS包年1G套餐</option>
+		                                       <option value="GPRS包年24MB">GPRS包年24MB</option>
+		                                       <option value="GPRS包年2G套餐">GPRS包年2G套餐</option>
+		                                       <option value="GPRS包年3600M套餐">GPRS包年3600M套餐</option>
+		                                       <option value="GPRS包年360MB">GPRS包年360MB</option>
+		                                       <option value="GPRS包年3G套餐">GPRS包年3G套餐</option>
+		                                       <option value="GPRS包年400M套餐">GPRS包年400M套餐</option>
+		                                       <option value="GPRS包年600M套餐">GPRS包年600M套餐</option>
+		                                       <option value="GPRS包年60MB">GPRS包年60MB</option>
+		                                       <option value="GPRS包年720M套餐">GPRS包年720M套餐</option>
+		                                       <option value="GPRS包年840MB">GPRS包年840MB</option>
+		                                       <option value="GPRS中小流量新10元套餐">GPRS中小流量新10元套餐</option>
+		                                       <option value="GPRS中小流量新1元套餐">GPRS中小流量新1元套餐</option>
+		                                       <option value="GPRS中小流量新20元套餐">GPRS中小流量新20元套餐</option>
+		                                       <option value="GPRS中小流量新2元套餐">GPRS中小流量新2元套餐</option>
+		                                       <option value="GPRS中小流量新3元套餐">GPRS中小流量新3元套餐</option>
+		                                       <option value="GPRS中小流量新5元套餐">GPRS中小流量新5元套餐</option>
+		                                       <option value="包年120M">包年120M</option>
+		                                       <option value="共享流量11G(110G)">共享流量11G(110G)</option>
+		                                       <option value="共享流量11G(220G)">共享流量11G(220G)</option>
+		                                       <option value="共享流量11G(33G)">共享流量11G(33G)</option>
+		                                       <option value="共享流量11G(44G)">共享流量11G(44G)</option>
+		                                       <option value="共享流量1G(10G)">共享流量1G(10G)</option>
+		                                       <option value="共享流量1G（20G）">共享流量1G（20G）</option>
+		                                       <option value="共享流量1G（5G）">共享流量1G（5G）</option>
+		                                       <option value="共享流量2G">共享流量2G</option>
+		                                       <option value="共享流量2G(100G)">共享流量2G(100G)</option>
+		                                       <option value="共享流量2G(10G)">共享流量2G(10G)</option>
+		                                       <option value="共享流量2G(140G)">共享流量2G(140G)</option>
+		                                       <option value="共享流量2G(16G)">共享流量2G(16G)</option>
+		                                       <option value="共享流量2G(190G)">共享流量2G(190G)</option>
+		                                       <option value="共享流量2G(20G)">共享流量2G(20G)</option>
+		                                       <option value="共享流量2G(22G)">共享流量2G(22G)</option>
+		                                       <option value="共享流量2G(26G)">共享流量2G(26G)</option>
+		                                       <option value="共享流量2G(40G)">共享流量2G(40G)</option>
+		                                       <option value="共享流量2G(4G)">共享流量2G(4G)</option>
+		                                       <option value="共享流量2G(6G)">共享流量2G(6G)</option>
+		                                       <option value="共享流量2G(8G)">共享流量2G(8G)</option>
+		                                       <option value="共享流量3G">共享流量3G</option>
+		                                       <option value="共享流量3G(150G)">共享流量3G(150G)</option>
+		                                       <option value="共享流量3G(15G)">共享流量3G(15G)</option>
+		                                 </select>
+		            <label>卡状态;</label><select class="easyui-combobox">
+	                                            <option value="">请选择</option>
+	                                            <option value="正常">正常</option>
+	                                            <option value="单向停机">单向停机</option>
+	                                            <option value="停机">停机</option>
+	                                            <option value="预销号">预销号</option>
+	                                            <option value="销号">销号</option>
+	                                            <option value="过户">过户</option>
+	                                            <option value="休眠">休眠</option>
+	                                            <option value="待激活">待激活</option>
+	                                            <option value="失败">失败</option>
+	                                        </select>
+	            </p>
+	            <p>
+		            <label>在线状态;</label><select class="easyui-combobox">
+		                                       <option value="">请选择</option> 
+		                                       <option value="工作中">在线</option>
+		                                        <option value="空闲">离线</option>
+		                                   </select>
+		            <label>GPRS管控;</label><select class="easyui-combobox">
+		                                       <option value="">请选择</option> 
+		                                       <option value="工作中">是</option>
+		                                        <option value="空闲">否</option>
+		                                   </select>
+		            <label>流量使用;</label><select class="easyui-combobox">
+		                                        <option value="">请选择</option>
+		                                        <option value="0.3">超30%</option> 
+		                                        <option value="0.5">超50%</option>
+		                                        <option value="0.8">超80%</option>
+		                                        <option value="0.9">超90%</option>
+		                                        <option value="0.95">超95%</option>
+		                                        <option value="1">超100%</option>
+		                                   </select>
+	            </p>
+	            <p>
+		            <label>开户日期;</label><input class="easyui-datebox" data-options="sharedCalendar:'#cc'" style="width:8%;"><input style="width:8%;" class="easyui-datebox" data-options="sharedCalendar:'#cc'">
+		            <label>激活日期;</label><input class="easyui-datebox" data-options="sharedCalendar:'#cc'" style="width:8%;"><input style="width:8%;" class="easyui-datebox" data-options="sharedCalendar:'#cc'">
+		            <label>到期日期;</label><input class="easyui-datebox" data-options="sharedCalendar:'#cc'" style="width:8%;"><input style="width:8%;" class="easyui-datebox" data-options="sharedCalendar:'#cc'">
+	            </p>
+	             <p>
+		            <label>卡段;</label><input style="width:8%;" type="text"/><input style="width:8%;" type="text"/>
+		            <label>IMSI;</label><input style="width:8%;" type="text"/><input style="width:8%;" type="text"/>
+		            <label>ICCID;</label><input style="width:8%;" type="text"/><input style="width:8%;" type="text"/>
+		            
+		            <a id="a4" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-expand'" onclick="obj.expand()">&nbsp;</a>
+					            <a id="a5" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-search'" onclick="obj.find()">查询</a>
+					            <a id="a6" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-redo'" onclick="obj.res()">重置</a>
+		            
+	            </p>
+            </div>
+        </div>
+        <div id="cc" class="easyui-calendar"></div>
+        <!--表格列表-->
+        <div class="tableCon">
+            <table id="table" class="tableStyle"></table>
+            <div id="tabelBut">
+                	<div>
+                    <a href="#" class="easyui-linkbutton" plain="true"  onclick="window.open('<%=basePath%>/csvoprate/export?filename='+'cardManagerInfo'+'&exportType=cardInfoExport', '', 'left=410,height=610, width=860, top=200,  toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no')">导出</a>
+                    <a href="#" class="easyui-linkbutton" plain="true"  onclick="obj.addBox()">发送短信</a>
+                    <a href="#" class="easyui-linkbutton" plain="true"  onclick="">充值</a>
+                    <a href="#" class="easyui-linkbutton" plain="true"  onclick="obj.submitType()">数据批量导入</a>
+    				</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+ 
+<!--导入前选择运营商-->
+<div id="importTypeBox">
+      <form id="importTypeForm" method="post">
+	     <div class="formDiv"><label>运营商:</label><select  name="operator" id="operator"  style="width:335px" editable="false" class="easyui-combobox" data-options="required:true"></select><span class="formSpan">*</span></div>
+	     <div class="forSubmint">
+	            <a href="#" class="easyui-linkbutton"  iconCls="icon-ok"  onclick="obj.import1()">确定</a>
+	      </div>
+      </form>
+</div>    	
+<!--//导入弹出框-->
+<div id="importBox" >
+  			<form id="importForm"  action="<%=basePath%>/csvoprate/upload" enctype="multipart/form-data" method="post">
+		        	<div class="formDiv">
+			            <tr>
+			                <td><input type="file" name="name" style="width: 60%;" id="uploadFile" class="easyui-validatebox" data-options="required:true"></td><span class="formSpan">*</span>
+			                 <a href="#" class="easyui-linkbutton" style="width: 30%;" iconCls="icon-ok"  onclick="window.open('<%=basePath%>/csvoprate/export?filename='+'cardManagerModel'+'&exportType=cardModelExport', '', 'left=410,height=610, width=860, top=200,  toolbar=no, menubar=no, scrollbars=no, resizable=no,location=no, status=no')">模板下载</a>    
+			            </tr>
+			        </div>
+			        <div class="forSubmint">
+			            <tr><td><input value="确认导入" style="width: 30%;left:10%;" class="easyui-linkbutton" id="upFile" onclick="obj.uploadFile()" iconCls="icon-redo" ></td></tr>
+		        	</div>
+		    </form>
+</div>
+<!--//新增弹出框-->
+<div id="addBox" >
+    <form id="addForm" method="post">
+        <div class="formDiv"><label>卡号:</label><input style="width:80%;height:160px;" class="easyui-textbox" name="message" data-options="multiline:true"></input></div>
+        <div class="formDiv"><label>短信内容:</label><input style="width:80%;height:160px;" class="easyui-textbox" name="message" data-options="multiline:true"></input></div>
+        <div class="forSubmint">
+            <a href="#" class="easyui-linkbutton"  iconCls="icon-ok"  onclick="obj.sum()">发送短信</a>
+            <a href="#" class="easyui-linkbutton"  iconCls="icon-ok"  onclick="obj.sum()">查看短信记录</a>
+        </div>
+    </form>
+</div>
+ <script type="text/javascript" src="<%=request.getContextPath()%>/js/jquery-easyui-1.7.0/src/jquery.form.js"></script>
+ <script src=cardManager.js></script>
+
+
+</body>
+</html>

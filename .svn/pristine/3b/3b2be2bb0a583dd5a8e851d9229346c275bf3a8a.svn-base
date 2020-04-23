@@ -1,0 +1,86 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="../../base.jsp"%>
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>卡出库</title>
+    <link type="text/css" rel="stylesheet" href="<%=request.getContextPath()%>/css/main.css">
+</head>
+<body>
+<div class="easyui-layout" data-options="fit:true" id="useBox">
+    <div data-options="region:'center',split:true">
+        <!--表格查询-->
+        <div class="tableFind">
+            <form id="queryForm" method="post">
+	            <p>
+		             <label>卡号;</label><input type="text"  name="accessNum" id="accessNumQuery" class="easyui-validatebox"/>
+		             <label>卡段;</label><input type="text"  name="accessNumStart" id="accessNumStartQuery" class="easyui-validatebox"/>
+		                                 <input type="text"  name="accessNumEnd" id="accessNumEndQuery" class="easyui-validatebox"/>
+		             <label>开户日期;</label> <input class="easyui-datebox" name="establishDateStart" id="establishDateStartQuery" data-options="sharedCalendar:'#cc'" style="width:8%;">
+		                                     <input class="easyui-datebox" name="establishDateEnd" id="establishDateEndQuery" data-options="sharedCalendar:'#cc'" style="width:8%;">
+		             <a id="btn" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-search'" onclick="obj.find()">查询</a>
+		            <a id="zhbtn" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-redo'" onclick="obj.queryRes()">重置</a>
+	            </p>
+            </form>
+        </div>
+        <div id="cc" class="easyui-calendar"></div>
+        <!--表格列表-->
+        <div class="tableCon">
+            <table id="table" class="tableStyle"></table>
+            <div id="tabelBut">
+                <div>
+                    <a href="#" class="easyui-linkbutton" plain="true"  iconCls="icon-edit"  onclick="obj.addBox()">批量出库</a>
+                    <a href="#" class="easyui-linkbutton" plain="true"  onclick="obj.history()">历史出库记录</a>
+                    <a href="#" class="easyui-linkbutton" plain="true"  onclick="obj.setOwner()">划卡</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--//新增弹出框-->
+<div id="addBox" >
+    <form id="addForm" method="post">
+        <div class="formDiv"><label>卡号:</label><input style="width:80%;height:160px;" class="easyui-textbox" name="accessNums" id="accessNums" data-options="multiline:true"></input></div>
+        <div class="formDiv"><label>使用卡段:</label><select  name="yesNo" id="yesNo"  style="width:410px" editable="false" class="easyui-combobox" data-options="required:true"></select><span class="formSpan">*</span></div>
+        <div class="formDiv" id="accessNumStart" ><label>卡段开始;</label><input type="text" id="accessNumStartId"  name="accessNumStart" class="easyui-validatebox" data-options="required:true"/><span class="formSpan">*</span></div>
+		<div class="formDiv" id="accessNumEnd"><label>卡段结束;</label><input type="text"  id="accessNumEndId" name="accessNumEnd"   class="easyui-validatebox" data-options="required:true"/><span class="formSpan">*</span></div>
+        <div class="formDiv"><label>代理商:</label><input type="text"   name="agencyName" id="orgName" editable="false" class="easyui-validatebox" data-options="required:true"><span class="formSpan">*</span><a href="#" class="easyui-linkbutton" onclick="openOrg()">选择</a></div>
+        <div class="formDiv"><label>出库价格:</label><input type="text" name="unitCost"/></div>
+        <input type="text" hidden="true" id="orgId"  name="agency">
+        <div class="forSubmint">
+            <a href="#" class="easyui-linkbutton"  iconCls="icon-ok"  onclick="obj.sum()">确定</a>
+            <a href="#" class="easyui-linkbutton"  iconCls="icon-cancel"  onclick="obj.can()">取消</a>
+        </div>
+    </form>
+    
+    <form id="openForm" name=form action="<%=request.getContextPath()%>/XuYuRepos/system/orgChoose.jsp" method="post" target="newWin">
+               <input type="text" hidden="true" id="openOrgId"  name="openOrgId" data-options="required:true">
+    </Form>  
+</div>
+<!-- 划卡弹出框 -->
+<div id="addOwnerBox" >
+    <form id="addOwnerForm" method="post">
+        <div class="formDiv"><label>卡号:</label><input style="width:80%;height:160px;" class="easyui-textbox" name="accessNums" id="accessNumsOwner" data-options="multiline:true"></input></div>
+        <div class="formDiv"><label>使用卡段:</label><select  name="yesNo" id="yesNoOwner"  style="width:410px" editable="false" class="easyui-combobox" data-options="required:true"></select><span class="formSpan">*</span></div>
+        <div class="formDiv" id="accessNumStartOwner" ><label>卡段开始;</label><input type="text" id="accessNumStartOwnerId" name="accessNumStart" class="easyui-validatebox"/><span class="formSpan">*</span></div>
+		<div class="formDiv" id="accessNumEndOwner"><label>卡段结束;</label><input type="text"  id="accessNumEndOwnerId" name="accessNumEnd"   class="easyui-validatebox"/><span class="formSpan">*</span></div>
+        <div class="formDiv"><label>群组:</label><input type="text"   name="ownerName" id="ownerName" editable="false" class="easyui-validatebox" data-options="required:true"><span class="formSpan">*</span><a href="#" class="easyui-linkbutton" onclick="openOwner()">选择</a></div>
+        <input type="text" hidden="true" id="ownerId"  name="owner">
+        <div class="forSubmint">
+            <a href="#" class="easyui-linkbutton"  iconCls="icon-ok"  onclick="obj.sumOwner()">确定</a>
+            <a href="#" class="easyui-linkbutton"  iconCls="icon-cancel"  onclick="obj.canOwner()">取消</a>
+        </div>
+    </form>
+    
+    <form id="openOwnerForm" name=form action="<%=request.getContextPath()%>/XuYuRepos/manager/groupChoose.jsp" method="post" target="newOwnerWin">
+    </Form>  
+</div>
+<script type="text/javascript">
+var bathPath="<%=basePath%>";
+</script>
+<script src=cardSelf.js></script>
+
+
+</body>
+</html>

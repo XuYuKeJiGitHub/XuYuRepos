@@ -1,0 +1,5 @@
+#系统默认配置文件
+uploadPath=/ormsstach/upload
+importPath=/ormsstach/import
+exportPath=/ormsstach/export
+maxUploadFileSize=153600000

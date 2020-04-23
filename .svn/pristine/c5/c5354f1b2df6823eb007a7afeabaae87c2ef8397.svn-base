@@ -1,0 +1,123 @@
+package com.xuyurepos.serviceImpl.system;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.xuyurepos.common.log.LoggerFactory;
+import com.xuyurepos.common.page.PageModel;
+import com.xuyurepos.common.util.StringUtil;
+import com.xuyurepos.dao.system.SystemOrgDao;
+import com.xuyurepos.entity.system.SystemOrg;
+import com.xuyurepos.service.system.SystemOrgService;
+import com.xuyurepos.vo.system.SystemOrgVo;
+
+@Service
+@Transactional
+public class SystemOrgServiceImpl implements SystemOrgService{
+	
+	Logger log=LoggerFactory.getInstance().getLogger(SystemOrgServiceImpl.class);
+	
+	@Resource
+	private SystemOrgDao systemOrgDao;
+    
+	/**
+	 * 分页查询
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public void findList(PageModel pageModel) {
+		pageModel.setRows(systemOrgDao.selectUserListWithPage(pageModel));
+	    pageModel.setTotal(systemOrgDao.selectUserCountWithPage(pageModel));
+	}
+    
+	/**
+	 * 删除
+	 */
+	@Override
+	public void delete(String ids) {
+		if(!StringUtil.isEmpty(ids)){
+			String[] idsStr=ids.split(";");
+			for (int i = 0; i < idsStr.length; i++) {
+				if(!StringUtil.isEmpty(idsStr[i])){
+					Integer id=Integer.valueOf(idsStr[i]);
+					SystemOrg systemOrg=systemOrgDao.find(id);
+					if(systemOrg!=null){
+						systemOrgDao.del(id);
+					}
+				}
+			}
+		}
+	}
+    
+	/**
+	 * 保存机构数据
+	 */
+	@Override
+	public SystemOrg saveInfo(SystemOrgVo systemOrgVo) {
+		log.info("SystemOrgVo:"+systemOrgVo.toString());
+		SystemOrg systemOrg=new SystemOrg();
+		if(systemOrgVo!=null&&systemOrgVo.getId()==0){
+			BeanUtils.copyProperties(systemOrgVo, systemOrg);
+			log.info("systemOrg:"+systemOrg.toString());
+			add(systemOrg);
+		}else{
+			systemOrg=edit(systemOrgVo);
+		}
+		return systemOrg;
+	}
+    
+	/**
+	 * 编辑
+	 * @param systemOrgVo
+	 * @return
+	 */
+	private SystemOrg edit(SystemOrgVo systemOrgVo) {
+		SystemOrg org=systemOrgDao.find(systemOrgVo.getId());
+		if(org!=null){
+			BeanUtils.copyProperties(systemOrgVo, org);
+			log.info("SystemOrg:"+org.toString());
+			systemOrgDao.update(org);
+		}
+		return org;
+	}
+    
+	/**
+	 * 添加
+	 * @param systemOrg
+	 * @return
+	 */
+	private SystemOrg add(SystemOrg systemOrg) {
+		systemOrgDao.insert(systemOrg);
+		return systemOrg;
+	}
+    
+	/**
+	 * 查询数据
+	 */
+	@Override
+	public SystemOrgVo find(String id) {
+		SystemOrgVo systemOrgVo=new SystemOrgVo();
+		if(!StringUtil.isEmpty(id)){
+			SystemOrg org=systemOrgDao.find(Integer.valueOf(id));
+			BeanUtils.copyProperties(org, systemOrgVo);
+		}
+		return systemOrgVo;
+	}
+
+	@Override
+	public List<SystemOrg> loadOrgTree() {
+		 return systemOrgDao.loadOrgTree();
+	}
+
+	@Override
+	public List<SystemOrg> loadOrgChildrenTree(String fID) {
+		 return systemOrgDao.loadOrgChildrenTree(fID);
+	}
+
+}

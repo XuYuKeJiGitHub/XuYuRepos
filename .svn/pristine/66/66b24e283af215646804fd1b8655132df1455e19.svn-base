@@ -1,0 +1,25 @@
+package com.xuyurepos.dao.manager;
+
+import org.apache.ibatis.annotations.Param;
+
+public interface XuyuContentCardMgrDao {
+	/**
+	 * 将导入临时表的数据插入目标表
+	 * @param operator 运营商
+	 * @param batchNo  关联id
+	 */
+	public void insertYd(@Param("operator")String operator,@Param("batchNo")String batchNo);
+	/**
+	 * 将导入临时表的数据插入目标表
+	 * @param operator 运营商
+	 * @param batchNo  关联id
+	 */
+	public void insertLt(@Param("operator")String operator,@Param("batchNo")String batchNo);
+	/**
+	 * 将导入临时表的数据插入目标表
+	 * @param operator 运营商
+	 * @param batchNo  关联id
+	 */
+	public void insertDx(@Param("operator")String operator,@Param("batchNo")String batchNo);
+	
+}

@@ -1,0 +1,111 @@
+package com.xuyurepos.service.intergration.xuyu.cmp;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.xuyurepos.common.util.XmlMapUtils;
+import com.xuyurepos.common.util.httpclient.HttpTookit;
+import com.xuyurepos.service.intergration.xuyu.telecom.sign.TelecomSign;
+import com.xuyurepos.service.intergration.xuyu.telecom.util.TelecomDesEncrypt;
+
+public class TelecomCMPRequest {
+
+	public static final String request_url="http://api.ct10649.com:9001/m2m_ec/query.do";
+	
+	public static Map init() {
+		Map initMap=new HashMap();
+    	//具体接口参数需参照自管理门户在线文档
+    	String user_id = "shizhang";     //用户名
+    	String password = "shizhang123A";    //密码
+        String key="633c4846B";
+        
+        initMap.put("userId",user_id);
+        initMap.put("password", password);
+        initMap.put("key", key);
+        return initMap;
+	}
+
+	
+	/**
+	 * 
+	 * @param access_number 物联网卡号(149或10649号段)
+	 * @param method 接口名
+	 * @param pageIndex 当前页
+	 * @return
+	 */
+	public static String telecomCMPRequest(Map map) {
+		
+		Map<String,String> initMap=init();
+		
+		String user_id=initMap.get("userId");		
+		String password=initMap.get("password");
+		String key=initMap.get("key");
+		
+    	
+		String passwordEnc = TelecomDesEncrypt.strEnc(password,key);  //密码加密 
+
+		Map params=new HashMap();
+		params.put("user_id", user_id);
+		params.put("password", password);
+		
+		
+		params.putAll(map);
+		
+		if(map.get("method").equals("queryTrafficByDate")) {
+			params.remove("startDate");
+			params.remove("endDate");
+			params.remove("needDtl");
+		}
+		
+		List<String> tempList=new ArrayList<String>(params.values());
+		String[] arr =new String[tempList.size()];
+		
+		for (int i = 0; i < tempList.size(); i++) {
+			arr[i]=tempList.get(i);
+		}
+		
+		
+
+		
+		String sign = TelecomSign.sign(arr); //生成sign加密值
+		params.remove("password");
+		params.put("passWord",passwordEnc);
+		params.put("sign", sign);
+		params.putAll(map);
+		
+
+
+	String result=HttpTookit.doGet(request_url, params,"UTF-8");
+	System.out.println(result);
+	
+	return result;
+	
+	
+	}
+	
+	
+	public static void main(String[] args) {
+//		19表示停机保号，20表示停机保号后复机,21表示测试期去激活，22表示测试期去激活后回到测试激活
+		
+		Map map=new HashMap();
+		map.put("method", "disabledNumber");
+		map.put("acctCd", "");
+		map.put("orderTypeId", "20");
+		map.put("access_number", "1064927437080");
+		
+		
+
+		
+	String resultXML=TelecomCMPRequest.telecomCMPRequest(map);
+    String xmlHeader="<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+
+	Map  resultMap  = XmlMapUtils.createMapByXml(xmlHeader+resultXML);
+	//{businessServiceResponse={result=0, GROUP_TRANSACTIONID=1000000190201904016726465988, RspType=0, resultMsg=处理成功！}}
+	String RspType=  ((Map)resultMap.get("businessServiceResponse")).get("RspType")+"";
+	System.out.println(RspType);
+	}
+}

@@ -1,0 +1,53 @@
+package com.xuyurepos.service.impl.autorule;
+
+import javax.annotation.Resource;
+
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Service;
+
+import com.xuyurepos.common.log.LoggerFactory;
+import com.xuyurepos.common.page.PageModel;
+import com.xuyurepos.dao.autorule.AotoRuleManagerDao;
+import com.xuyurepos.service.autorule.AotoRuleManagerService;
+import com.xuyurepos.vo.autorule.AutoRuleManagerDTO;
+@Service
+public class AotoRuleManagerServiceImpl implements AotoRuleManagerService {
+	Logger log=LoggerFactory.getInstance().getLogger(AotoRuleManagerServiceImpl.class);
+	@Resource
+	private AotoRuleManagerDao aotoRuleManagerDao;
+	@Override
+	public void saveRule(AutoRuleManagerDTO autoRuleManagerDTO) {
+		aotoRuleManagerDao.saveRule(autoRuleManagerDTO);
+	}
+	/**
+	 * 分页查询数据列表
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public void findList(PageModel pageModel) {
+		pageModel.setRows(aotoRuleManagerDao.selectRuleListWithPage(pageModel));
+	    pageModel.setTotal(aotoRuleManagerDao.selectRuleCountWithPage(pageModel));
+	}
+	@Override
+	public AutoRuleManagerDTO find(String id) {
+		return aotoRuleManagerDao.getRuleInfo(id);
+	}
+	@Override
+	public void updateRule(AutoRuleManagerDTO autoRuleManagerDTO) {
+		aotoRuleManagerDao.updateRule(autoRuleManagerDTO);
+	}
+	@Override
+	public void stopRule(String id) {
+		aotoRuleManagerDao.stopRule(id); 
+	}
+	@Override
+	public void findListLog(PageModel pageModel) {
+		pageModel.setRows(aotoRuleManagerDao.selectRuleLogWithPage(pageModel));
+	    pageModel.setTotal(aotoRuleManagerDao.selectRuleLogCountWithPage(pageModel));
+	}
+	@Override
+	public void findGprsYesDList(PageModel pageModel) {
+		pageModel.setRows(aotoRuleManagerDao.selectRuleYesWithPage(pageModel));
+	    pageModel.setTotal(aotoRuleManagerDao.selectRuleYesCountWithPage(pageModel));
+	}
+}

@@ -1,0 +1,118 @@
+package com.xuyurepos.controller.facade;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSONObject;
+import com.xuyurepos.common.log.LoggerFactory;
+import com.xuyurepos.common.util.MD5Util;
+import com.xuyurepos.service.facade.FacadeService;
+/**
+ * 外部接口
+ * @author yangfei
+ *
+ */
+@Controller
+@RequestMapping(value = "/facade")
+public class FacadeControl {
+	
+	Logger logger=LoggerFactory.getInstance().getLogger(FacadeControl.class);
+	
+	@Autowired
+	private FacadeService facadeService; 
+	
+	/**
+	 * 一、单卡GPRS用量信息查询
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/singleGprsInfoQuery", produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String singleGprsInfoQuery(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		try {
+			Map<String,Object> result=new HashMap<String,Object>();
+			String agencyCode=request.getParameter("agencyCode");
+			String accessNum=request.getParameter("accessNum");
+			String provider=request.getParameter("provider");
+			String arrea=request.getParameter("arrea");
+			String queryDate=request.getParameter("queryDate");
+			String sign=request.getParameter("sign");
+			// 非空校验
+			if(agencyCode==null||"".equals(agencyCode)){
+				result.put("requestCode", "-1");
+				result.put("requestMsg", "参数异常;agencyCode为必填");
+				String returnStr = JSONObject.toJSONString(result);
+				return returnStr;
+			}
+			if(accessNum==null||"".equals(accessNum)){
+				result.put("requestCode", "-1");
+				result.put("requestMsg", "参数异常;accessNum为必填");
+				String returnStr = JSONObject.toJSONString(result);
+				return returnStr;
+			}
+			if(provider==null||"".equals(provider)){
+				result.put("requestCode", "-1");
+				result.put("requestMsg", "参数异常;provider为必填");
+				String returnStr = JSONObject.toJSONString(result);
+				return returnStr;
+			
+			}
+			if(sign==null||"".equals(sign)){
+				result.put("requestCode", "-1");
+				result.put("requestMsg", "参数异常;sign为必填");
+				String returnStr = JSONObject.toJSONString(result);
+				return returnStr;
+			
+			}
+			Map<String, String> params=new HashMap<String, String>();
+			// 默认key
+			params.put("key", "xuYuRepos2019");
+			params.put(agencyCode, agencyCode);
+			params.put(accessNum, accessNum);
+			params.put(provider, provider);
+			if(arrea!=null&&!"".equals(arrea)){
+				params.put(arrea, arrea);
+			}
+			if(queryDate!=null&&!"".equals(queryDate)){
+			    params.put(queryDate, queryDate);
+			}
+			// 校验供应商代码暂时不做
+			result=facadeService.singleGprsInfoQuery();
+		
+			// 第一步校验参数
+			String returnStr = JSONObject.toJSONString(result);
+			return returnStr;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "";
+		}
+		
+	}
+	
+	/**
+	 * 二、批量GPRS用量信息查询
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/batchGprsInfoQuery")
+	public String batchGprsInfoQuery(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		return "";
+	}
+	
+	
+
+}

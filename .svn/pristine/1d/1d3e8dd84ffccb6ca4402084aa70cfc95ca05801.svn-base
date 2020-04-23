@@ -1,0 +1,9 @@
+package com.xuyurepos.service.manager;
+
+import com.xuyurepos.common.page.PageModel;
+
+public interface IccIdManagerService {
+
+	public void findList(PageModel pageModel);
+
+}

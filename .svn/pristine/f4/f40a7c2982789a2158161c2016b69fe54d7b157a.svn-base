@@ -1,0 +1,69 @@
+package com.xuyurepos.service.impl.manager;
+
+import javax.annotation.Resource;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+
+import com.xuyurepos.common.constants.SystemConstants;
+import com.xuyurepos.common.log.LoggerFactory;
+import com.xuyurepos.common.page.PageModel;
+import com.xuyurepos.common.util.StringUtil;
+import com.xuyurepos.dao.manager.XuyuContentCardInfoDao;
+import com.xuyurepos.dao.manager.XuyuContentCardMgrDao;
+import com.xuyurepos.entity.manager.XuyuContentCardMgr;
+import com.xuyurepos.service.manager.XuyuContentCardMgrSelfService;
+import com.xuyurepos.vo.manager.XuyuContentCardMgrSelfVo;
+import com.xuyurepos.vo.manager.XuyuContentCardMgrVo;
+@Service
+public class XuyuContentCardMgrSelfServiceImpl implements XuyuContentCardMgrSelfService{
+	
+	Logger log=LoggerFactory.getInstance().getLogger(XuyuContentCardMgrServiceImpl.class);
+
+	@Resource
+	private XuyuContentCardMgrDao xuyuContentCardMgrDao;
+	@Resource
+	private XuyuContentCardInfoDao xuyuContentCardInfoDao;
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public void findList(PageModel pageModel) {
+		pageModel.setRows(xuyuContentCardMgrDao.selectListWithPage(pageModel));
+	    pageModel.setTotal(xuyuContentCardMgrDao.selectCountWithPage(pageModel));
+	}
+
+	@Override
+	public XuyuContentCardMgrVo find(String id) {
+		XuyuContentCardMgrVo xuyuContentCardMgrVo=new XuyuContentCardMgrVo();
+		if(!StringUtil.isEmpty(id)){
+			XuyuContentCardMgr xuyuContentCardMgr=xuyuContentCardMgrDao.find(Integer.valueOf(id));
+			BeanUtils.copyProperties(xuyuContentCardMgr, xuyuContentCardMgrVo);
+			xuyuContentCardMgrVo.setId(id);
+		}
+		return xuyuContentCardMgrVo;
+	}
+    
+	/**
+	 * 批量出库
+	 */
+	@Override
+	public void selfAll(XuyuContentCardMgrSelfVo xuyuContentCardMgrVo) {
+		// 先判断是否为卡段处理
+		if(xuyuContentCardMgrVo!=null){
+			if(SystemConstants.STRING_YES.equals(xuyuContentCardMgrVo.getYesNo())){
+			}else{
+				String accessNums=xuyuContentCardMgrVo.getAccessNums();
+				if(accessNums!=null&&!SystemConstants.STRINGEMPTY.equals(accessNums)){
+					String[] accessNumStr=accessNums.split(";");
+					for (int i = 0; i < accessNumStr.length; i++) {
+						
+					}
+				}
+				
+			}
+		}
+		
+	}
+
+}

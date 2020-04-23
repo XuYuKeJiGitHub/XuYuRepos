@@ -1,0 +1,1243 @@
+/**
+ * Created by Administrator on 2017/11/8.
+ */
+// 加载树
+$(function () {
+	
+		 // 回车事件
+	    $(document).keydown(function (event) {
+	       if (event.keyCode == 13) {
+	    	   obj.find();
+	       }
+	    });
+		
+		$("#ownerPlaceDiv").hide();
+		
+		$("#comboTypeDiv").hide();
+		$("#comboNameDiv").hide();
+		$("#payTypeDiv").hide();
+		$("#silentTypeDiv").hide();
+		$("#haveTestDiv").hide();
+		$("#ownerNameDiv").hide();
+		
+	     //下拉框值加载
+        $("#operator").combobox({
+          url: basePath+'/systemlookupitem/lookUp?fLookUpId=OPERATOR',
+          method : "post",
+          valueField: 'value',
+          textField: 'text',
+          selected: 'selected',
+          onChange: function (n,o) {
+	    	  if(n=='1'){
+	    		  $('#ownerPlace').combobox({required:true});
+	    		  $("#ownerPlaceDiv").show();
+	    	  }else{
+	    		  $('#ownerPlace').combobox({required:false})
+	    		  $("#ownerPlaceDiv").hide();
+	    		 
+	    	  }
+          }
+        });
+        
+	    $("#yesNoOwner").combobox({
+		      url: basePath+'/systemlookupitem/lookUp?fLookUpId=YES_NO',
+		      method : "post",
+		      valueField: 'value',
+		      textField: 'text',
+		      selected: 'selected',
+		      onChange: function (n,o) {
+		    	  if(n=='y'){
+		    		  $('#accessNumStartOwnerId').validatebox('options').required = true;
+		    		  $('#accessNumEndOwnerId').validatebox('options').required = true;
+		    		  
+		    		  $("#accessNumStartOwner").show();
+		    		  $("#accessNumEndOwner").show();
+		    		 
+		    	  }else{
+		    		  $('#accessNumStartOwnerId').validatebox('options').required = false;
+		    		  $('#accessNumEndOwnerId').validatebox('options').required = false;
+		    		  
+		    		  $("#accessNumStartOwner").hide();
+		    		  $("#accessNumEndOwner").hide();
+		    		  
+		    	  }
+		      }
+		});
+	    
+	    $("#yesNoGroup").combobox({
+		      url: basePath+'/systemlookupitem/lookUp?fLookUpId=YES_NO',
+		      method : "post",
+		      valueField: 'value',
+		      textField: 'text',
+		      selected: 'selected',
+		      onChange: function (n,o) {
+		    	  if(n=='y'){
+		    		  $('#ownerName').validatebox('options').required = true;
+		    		  
+		    		  $('#comboTypeOwner').combobox({required:false})
+		    		  $('#comboName').combobox({required:false})
+		    		  $('#payType').combobox({required:false})
+		    		  
+		    		  $("#comboTypeDiv").hide();
+		    		  $("#comboNameDiv").hide();
+		    		  $("#payTypeDiv").hide();
+		    		  $("#silentTypeDiv").hide();
+		    		  $("#haveTestDiv").hide();
+		    		  $("#ownerNameDiv").show();
+		    		  
+		    	  }else{
+                      $('#ownerName').validatebox('options').required = false;
+		    		  
+		    		  $('#comboTypeOwner').combobox({required:true})
+		    		  $('#comboName').combobox({required:true})
+		    		  $('#payType').combobox({required:true})
+		    		  
+		    		  $("#comboTypeDiv").show();
+		    		  $("#comboNameDiv").show();
+		    		  $("#payTypeDiv").show();
+		    		  $("#silentTypeDiv").show();
+		    		  $("#haveTestDiv").show();
+		    		  $("#ownerNameDiv").hide();
+		    	  }
+		      }
+		});
+	    
+	    
+        
+        $("#workingConditionYd").combobox({
+		      url: basePath+'/systemlookupitem/lookUp?fLookUpId=MOBILE_CARD_STATU',
+		      method : "post",
+		      valueField: 'value',
+		      textField: 'text'
+	    });
+	    
+	    $("#workingConditionLt").combobox({
+		      url: basePath+'/systemlookupitem/lookUp?fLookUpId=UNICOM_CARD_STATU',
+		      method : "post",
+		      valueField: 'value',
+		      textField: 'text'
+	    });
+	    
+	    $("#workingConditionDx").combobox({
+		      url: basePath+'/systemlookupitem/lookUp?fLookUpId=TELECOM_CARD_STATU',
+		      method : "post",
+		      valueField: 'value',
+		      textField: 'text'
+	    });
+	    
+	    $("#billingStatusQuery").combobox({
+		      url: basePath+'/systemlookupitem/lookUp?fLookUpId=ONLINE_STATU',
+		      method : "post",
+		      valueField: 'value',
+		      textField: 'text'
+	    });
+        
+        $("#operatorQuery").combobox({
+            url: basePath+'/systemlookupitem/lookUp?fLookUpId=OPERATOR',
+            method : "post",
+            valueField: 'value',
+            textField: 'text',
+            selected: 'selected',
+            onChange: function (n,o) {
+	        	if(n=='1'){
+	        		$("#workingConditionQuery").combobox("loadData",$("#workingConditionYd").combobox('getData')); 
+	        	}else if(n=='2'){
+	        		$("#workingConditionQuery").combobox("loadData",$("#workingConditionLt").combobox('getData')); 
+	        	}else if(n=='3'){
+	        		$("#workingConditionQuery").combobox("loadData",$("#workingConditionDx").combobox('getData')); 
+	        	}else{
+	        		$("#workingConditionQuery").combobox("loadData",'');
+	        	}
+	        }
+        });
+        
+        $("#paymentTypeQuery").combobox({
+            url: basePath+'/systemlookupitem/lookUp?fLookUpId=PAY_TYPE',
+            method : "post",
+            valueField: 'value',
+            textField: 'text',
+            selected: 'selected'
+        });
+        
+	    $("#comboTypeQuery").combobox({
+		      url: basePath+'/systemlookupitem/lookUp?fLookUpId=OWNER_COMBO_TYPE',
+		      method : "post",
+		      valueField: 'value',
+		      textField: 'text'
+		});
+        
+	    $("#comboNameQuery").combobox({
+		      url: basePath+'/systemlookupitem/lookUp?fLookUpId=OWNER_COMBO_NAME',
+		      method : "post",
+		      valueField: 'value',
+		      textField: 'text'
+	    });
+        
+        
+        $("#ownerPlace").combobox({
+            url: basePath+'/systemlookupitem/lookUp?fLookUpId=OPERATOR_YD',
+            method : "post",
+            valueField: 'value',
+            textField: 'text',
+            selected: 'selected'
+        });
+        
+        $("#realComboTypeQuery").combobox({
+            url: basePath+'/systemlookupitem/lookUp?fLookUpId=OPERATOR_COMBO_TYPE',
+            method : "post",
+            valueField: 'value',
+            textField: 'text',
+            selected: 'selected'
+        });
+        
+        $("#comboTypeQuery").combobox({
+            url: basePath+'/systemlookupitem/lookUp?fLookUpId=OWNER_COMBO_TYPE',
+            method : "post",
+            valueField: 'value',
+            textField: 'text',
+            selected: 'selected'
+        });
+        
+	    $("#comboType").combobox({
+	      url: basePath+'/systemlookupitem/lookUp?fLookUpId=OPERATOR_COMBO_TYPE',
+	      method : "post",
+	      valueField: 'value',
+	      textField: 'text'
+	    });
+	    
+	    $("#comboTypeOwner").combobox({
+		      url: basePath+'/systemlookupitem/lookUp?fLookUpId=OWNER_COMBO_TYPE',
+		      method : "post",
+		      valueField: 'value',
+		      textField: 'text'
+		 });
+	    
+	    
+	    $("#comboName").combobox({
+		      url: basePath+'/systemlookupitem/lookUp?fLookUpId=OWNER_COMBO_NAME',
+		      method : "post",
+		      valueField: 'value',
+		      textField: 'text'
+	    });
+	    
+	    $("#payType").combobox({
+		      url: basePath+'/systemlookupitem/lookUp?fLookUpId=PAY_TYPE',
+		      method : "post",
+		      valueField: 'value',
+		      textField: 'text'
+		});
+	    
+	    $("#silentType").combobox({
+		      url: basePath+'/systemlookupitem/lookUp?fLookUpId=SILENT_TYPE',
+		      method : "post",
+		      valueField: 'value',
+		      textField: 'text'
+		});
+	    
+	    $("#haveTest").combobox({
+		      url: basePath+'/systemlookupitem/lookUp?fLookUpId=HAVE_TEST',
+		      method : "post",
+		      valueField: 'value',
+		      textField: 'text'
+		});
+        
+        
+        $("#waitType").combobox({
+            url: basePath+'/systemlookupitem/lookUp?fLookUpId=OPERATOR_WAIT_TYPE',
+            method : "post",
+            valueField: 'value',
+            textField: 'text',
+            selected: 'selected'
+        });
+        
+        $("#testType").combobox({
+            url: basePath+'/systemlookupitem/lookUp?fLookUpId=OPERATOR_TEST_TYPE',
+            method : "post",
+            valueField: 'value',
+            textField: 'text',
+            selected: 'selected'
+        });
+        
+        $("#cardType").combobox({
+            url: basePath+'/systemlookupitem/lookUp?fLookUpId=CARD_TYPE',
+            method : "post",
+            valueField: 'value',
+            textField: 'text',
+            selected: 'selected'
+        });
+        
+        $("#standard").combobox({
+            url: basePath+'/systemlookupitem/lookUp?fLookUpId=STANDARD',
+            method : "post",
+            valueField: 'value',
+            textField: 'text',
+            selected: 'selected'
+        });
+        
+        
+        var height= document.body.clientHeight-105;
+        // 加载表格
+        $("#table").datagrid({
+                title:"数据列表",
+                url:'',
+                loadMsg:"正在加载数据...",
+                striped:true,
+                pagination:true,
+                rownumbers:true,
+                pageNumber:1,
+                nowrap:true,
+                height:height+'px;',
+                sortName:'id',
+                checkOnSelect:false,
+                sortOrder:'asc',
+                toolbar: '#tabelBut',
+                columns:[[
+                        {
+                        	    checkbox:true,
+                                field:'id',
+                                title:'编号',
+                                width:100,
+                                align:'center'
+                        },
+                        {
+                            field:'accessNum',
+                            title:'接入号',
+                            width:180,
+                            align:'center'
+                        },
+                        {
+                            field:'iccid',
+                            title:'iccid',
+                            width:180,
+                            align:'center'
+                        },
+                        {
+                            field:'imsi',
+                            title:'imsi',
+                            width:150,
+                            align:'center'
+                        },
+                        {
+                        	 field:'paymentType',
+                             title:'支付类型',
+                             width:100,
+                             align:'center',
+                             formatter:function (val,row) {
+                         		var value="";
+                         		var fields=$("#paymentTypeQuery").combobox('getData');
+                         		$.each(fields,function(k,v){
+                         			if(v.value==val){
+                         				value=v.text;
+                         			}
+                         		})
+                                 return value;
+                             }
+                        },
+                        {
+                            field:'provider',
+                            title:'运营商',
+                            width:100,
+                            align:'center',
+                            formatter:function (val,row) {
+                        		var value="";
+                        		var fields=$("#operator").combobox('getData');
+                        		$.each(fields,function(k,v){
+                        			if(v.value==val){
+                        				value=v.text;
+                        			}
+                        		})
+                                return value;
+                            }
+                        },
+                        {
+                            field:'b3',
+                            title:'客户名称',
+                            width:100,
+                            align:'center'
+                        },
+                        {
+                       	 field:'agency',
+                            title:'代理商id',
+                            hidden:true,
+                            width:180,
+                            align:'center'
+                       },
+                       {
+                           field:'agencyName',
+                           title:'代理商',
+                           width:180,
+                           align:'center'
+                        },
+                        {
+                            field:'workingCondition',
+                            title:'卡状态    ',
+                            width:150,
+                            align:'center',
+                            formatter:function (val,row) {
+                            	if(val==undefined){
+                            		 e = '';
+                            	}else{
+                            		if(row.provider=='1'){
+                            			var value="";
+                                		var fields=$("#workingConditionYd").combobox('getData');
+                                		$.each(fields,function(k,v){
+                                			if(v.value==val){
+                                				value=v.text;
+                                			}
+                                		})
+                            			e = '<a  id="add" data-id="98" class=" operA"  onclick="">'+value+'</a> ';
+                            		}else if(row.provider=='2'){
+                            			var value="";
+                                		var fields=$("#workingConditionLt").combobox('getData');
+                                		$.each(fields,function(k,v){
+                                			if(v.value==val){
+                                				value=v.text;
+                                			}
+                                		})
+                            			e = '<a  id="add" data-id="98" class=" operA"  onclick="">'+value+'</a> ';
+                            		}else if(row.provider=='3'){
+                            			var value="";
+                                		var fields=$("#workingConditionDx").combobox('getData');
+                                		$.each(fields,function(k,v){
+                                			if(v.value==val){
+                                				value=v.text;
+                                			}
+                                		})
+                            			e = '<a  id="add" data-id="98" class=" operA"  onclick="">'+value+'</a> ';
+                            		}
+                            	}
+                               
+                                return e;
+                            }
+                        },
+                        {
+                            field:'comboType',
+                            title:'套餐类型',
+                            width:100,
+                            align:'center',
+                        	formatter:function (val,row) {
+                        		var value="";
+                        		var fields=$("#comboTypeQuery").combobox('getData');
+                        		$.each(fields,function(k,v){
+                        			if(v.value==val){
+                        				value=v.text;
+                        			}
+                        		})
+                                return value;
+                            }
+                        },
+                        {
+                            field:'comnoName',
+                            title:'套餐',
+                            width:200,
+                            align:'center',
+                            formatter:function (val,row) {
+                        		var value="";
+                        		var fields=$("#comboNameQuery").combobox('getData');
+                        		$.each(fields,function(k,v){
+                        			if(v.value==val){
+                        				value=v.text;
+                        			}
+                        		})
+                                return value;
+                            }
+                        },
+                        {
+                        	field:'useGprs',
+                            title:'当月用量 ',
+                            width:100,
+                            align:'center',
+                            formatter:function (val,row) {
+                            	if(val==undefined){
+                            		e = '<a  id="add" data-id="98" class=" operA"  onclick="">0</a> ';
+                            	}else if(val>1024){
+                            		val=val/1024
+                            		e = '<a  id="add" data-id="98" class=" operA"  onclick="">'+val+'G</a> ';
+                            	}else{
+                            		e = '<a  id="add" data-id="98" class=" operA"  onclick="">'+val+'M</a> ';
+                            	}
+                                
+                                return e;
+                            }
+                        },
+                        {
+                        	field:'email6',
+                            title:'余额    ',
+                            width:100,
+                            align:'center'
+                        },
+                        {
+                        	field:'messageCount',
+                            title:'已发短信    ',
+                            width:100,
+                            align:'center',
+                            formatter:function (val,row) {
+                            	if(val==undefined){
+                            		e = '<a  id="add" data-id="98" class=" operA"  onclick="">0条</a> ';
+                           		    return e;
+                            	}else{
+                            		 e = '<a  id="add" data-id="98" class=" operA"  onclick="">'+val+'条</a> ';
+                            		 return e;
+                            	}
+                            }
+                        },
+                        {
+                        	field:'realWaitType',
+                            title:'沉默期类型(实际)',
+                            width:150,
+                            align:'center',
+                            formatter:function (val,row) {
+                        		var value="";
+                        		var fields=$("#waitType").combobox('getData');
+                        		$.each(fields,function(k,v){
+                        			if(v.value==val){
+                        				value=v.text;
+                        			}
+                        		})
+                                return value;
+                            }
+                        },
+                        {
+                        	field:'realTestType',
+                            title:'测试期类型(实际)',
+                            width:150,
+                            align:'center',
+                            formatter:function (val,row) {
+                        		var value="";
+                        		var fields=$("#testType").combobox('getData');
+                        		$.each(fields,function(k,v){
+                        			if(v.value==val){
+                        				value=v.text;
+                        			}
+                        		})
+                                return value;
+                            }
+                        },
+                        {
+                        	field:'realEstablish',
+                            title:'开户日期 (实际)',
+                            width:200,
+                            align:'center'
+                        },
+                        {
+                        	field:'realActivate',
+                            title:'激活日期 (实际)',
+                            width:200,
+                            align:'center'
+                        },
+                        {
+                        	field:'realWaitDate',
+                            title:'沉默期到期时间(实际)',
+                            width:200,
+                            align:'center'
+                        },
+                        {
+                        	field:'billingStatus',
+                            title:'在线状态    ',
+                            width:100,
+                            align:'center',
+                            formatter:function (val,row) {
+                        		var value="";
+                        		var fields=$("#billingStatusQuery").combobox('getData');
+                        		$.each(fields,function(k,v){
+                        			if(v.value==val){
+                        				value=v.text;
+                        			}
+                        		})
+                        		if(value!=""){
+                        			value = '<a  id="add" data-id="98" class=" operA"  onclick="">'+value+'</a> ';
+                        		}
+                                return value;
+                            }
+                        },
+                        {
+                        	field:'realCombotype',
+                            title:'实际套餐    ',
+                            width:100,
+                            align:'center',
+                            formatter:function (val,row) {
+                        		var value="";
+                        		var fields=$("#realComboTypeQuery").combobox('getData');
+                        		$.each(fields,function(k,v){
+                        			if(v.value==val){
+                        				value=v.text;
+                        			}
+                        		})
+                                return value;
+                            }
+                        },
+                        {
+                        	field:'email13',
+                            title:'成本单价    ',
+                            width:100,
+                            align:'center'
+                        },
+                        {
+                        	field:'email14',
+                            title:'当月费用    ',
+                            width:200,
+                            align:'center'
+                        },
+                        {
+                        	field:'a1',
+                            title:'理想化成本    ',
+                            width:200,
+                            align:'center'
+                        },
+                        {
+                        	field:'a2',
+                            title:'营收    ',
+                            width:200,
+                            align:'center'
+                        },
+                        {
+                        	field:'email15',
+                            title:'上月消费额度    ',
+                            width:100,
+                            align:'center'
+                        },
+                        {
+                        	field:'email16',
+                            title:'剩余额度    ',
+                            width:200,
+                            align:'center'
+                        },
+                        {
+                        	field:'email17',
+                            title:'实际利润    ',
+                            width:200,
+                            align:'center'
+                        },
+                        {
+                        	field:'email18',
+                            title:'理想化利润    ',
+                            width:200,
+                            align:'center'
+                        },{
+                        	field:'mark',
+                            title:'备注    ',
+                            width:200,
+                            align:'center'
+                        }
+                ]]
+        })
+        
+        var p = $('#table').datagrid('getPager');
+        $(p).pagination({
+        	pageSize: 10,//每页显示的记录条数，默认为20
+            pageList: [10,20,50,100],//可以设置每页记录条数的列表
+            beforePageText: '第',//页数文本框前显示的汉字
+            afterPageText: '页    共 {pages} 页',
+            displayMsg: '共 {total} 条记录',
+            onSelectPage: function (pageNumber, pageSize) {//分页触发
+                find(pageNumber, pageSize);
+            }
+        });
+        
+        function find(pageNumber, pageSize)
+        {
+                $("#table").datagrid('getPager').pagination({pageSize : pageSize, pageNumber : pageNumber});//重置
+                $("#table").datagrid("loading"); //加屏蔽
+                $.ajax({
+                    type : "POST",
+                    dataType : "json",
+                    url:basePath+'/xuyucontentcardmgr/findList',
+                    data : {
+                        pageNumber : pageNumber,
+                        pageSize : pageSize,
+                        keywords:$.trim($("#keywordsQuery").val()),
+                  	    paymentType:$.trim($("#paymentTypeQuery").combobox('getValue')),
+                  	    provider:$.trim($("#operatorQuery").combobox('getValue')),
+                  	    comboType:$.trim($("#comboTypeQuery").combobox('getValue')),
+                  	    comboName:$.trim($("#comboNameQuery").combobox('getValue')),  
+                  	    realComboType:$.trim($("#realComboTypeQuery").combobox('getValue')),
+                  	    workingCondition:$.trim($("#workingConditionQuery").combobox('getValue')),
+                  	    billingStatus:$.trim($("#billingStatusQuery").combobox('getValue')),
+                  	    realEstablishStart:$.trim($("#realEstablishStartQuery").datebox("getValue")),
+                  	    realEstablishEnd:$.trim($("#realEstablishEndQuery").datebox("getValue")),
+                  	    realActivateStart:$.trim($("#realActivateStartQuery").datebox("getValue")),
+                  	    realActivateEnd:$.trim($("#realActivateEndQuery").datebox("getValue")),
+                  	    realWaitDateStart:$.trim($("#realWaitDateStartQuery").datebox("getValue")),
+                  	    realWaitDateEnd:$.trim($("#realWaitDateEndQuery").datebox("getValue")),
+                  	    accessNumStart:$.trim($("#accessNumStartQuery").val()),
+                  	    accessNumEnd:$.trim($("#accessNumEndQuery").val()),
+                  	    imsiStart:$.trim($("#imsiStartQuery").val()),
+                  	    imsiEnd:$.trim($("#imsiEndQuery").val()),
+                  	    iccidStart:$.trim($("#iccidStartQuery").val()),
+                  	    iccidEnd:$.trim($("#iccidEndQuery").val()),
+                  	    mark:$.trim($("#markQuery").val())
+                    },
+                    success : function(data) {
+                        $("#table").datagrid('loadData',data);
+                        $("#table").datagrid("loaded"); //移除屏蔽
+                    },
+                    error : function(err) {
+                        $.messager.alert('操作提示', '获取信息失败...请联系管理员!', 'error');
+                        $("#table").datagrid("loaded"); //移除屏蔽
+                    }
+                });
+
+        }
+        
+        
+        // 加载默认查询条件
+        queryLoad=function(){
+             $("#a4").hide();
+             $("#a5").hide();
+             $("#a6").hide();
+
+             $("#a1").show();
+             $("#a2").show();
+             $("#a3").show();
+             
+             obj.find();
+        }
+        
+        queryLoad();
+})
+obj={
+        // 查询
+        find:function () {
+	        	 var opts = $("#table").datagrid("options");
+	             opts.url = basePath+'/iccidmanager/findList';
+                  $("#table").datagrid('load',{
+                	  keywords:$.trim($("#keywordsQuery").val()),
+                	  paymentType:$.trim($("#paymentTypeQuery").combobox('getValue')),
+                	  provider:$.trim($("#operatorQuery").combobox('getValue')),
+                	  comboType:$.trim($("#comboTypeQuery").combobox('getValue')),
+                	  comboName:$.trim($("#comboNameQuery").combobox('getValue')),  
+                	  realComboType:$.trim($("#realComboTypeQuery").combobox('getValue')),
+                	  workingCondition:$.trim($("#workingConditionQuery").combobox('getValue')),
+                	  billingStatus:$.trim($("#billingStatusQuery").combobox('getValue')),
+                	  realEstablishStart:$.trim($("#realEstablishStartQuery").datebox("getValue")),
+                	  realEstablishEnd:$.trim($("#realEstablishEndQuery").datebox("getValue")),
+                	  realActivateStart:$.trim($("#realActivateStartQuery").datebox("getValue")),
+                	  realActivateEnd:$.trim($("#realActivateEndQuery").datebox("getValue")),
+                	  realWaitDateStart:$.trim($("#realWaitDateStartQuery").datebox("getValue")),
+                	  realWaitDateEnd:$.trim($("#realWaitDateEndQuery").datebox("getValue")),
+                	  accessNumStart:$.trim($("#accessNumStartQuery").val()),
+                	  accessNumEnd:$.trim($("#accessNumEndQuery").val()),
+                	  imsiStart:$.trim($("#imsiStartQuery").val()),
+                	  imsiEnd:$.trim($("#imsiEndQuery").val()),
+                	  iccidStart:$.trim($("#iccidStartQuery").val()),
+                	  iccidEnd:$.trim($("#iccidEndQuery").val()),
+                	  mark:$.trim($("#markQuery").val())
+                  })
+        },// 添加备注
+        addMark:function(){
+        	var rows=$("#table").datagrid("getSelections");
+            if(rows.length>0){
+            	$("#addMarkBox").dialog({
+                    closed: false
+                });
+            }else{
+                $.messager.alert('信息提示','请选择要添加备注的数据','info');
+            }
+        },
+        // 添加
+        addBox:function () {
+        	var rows=$("#table").datagrid("getSelections");
+            if(rows.length>0){
+            	$("#addBox").dialog({
+                        closed: false
+                })
+                var ids=[];
+            	var accessNums=[];
+                for(i=0;i<rows.length;i++){
+         	    	accessNums.push(rows[i].accessNum);
+                }
+                $("#addForm").form('reset');
+                var result1=accessNums.join(';');
+                $("#accessNums").textbox('setValue',result1);
+           
+            }else{
+                $.messager.alert('信息提示','请选择要发送短信的数据','info');
+            }
+        },// 划卡
+        setOwner:function () {
+            var rows=$("#table").datagrid("getSelections");
+            var ids=[];
+            for(i=0;i<rows.length;i++){
+    	    	ids.push(rows[i].accessNum);
+            }
+       	    $("#addOwnerBox").dialog({
+                 closed: false
+            })
+            $("#addOwnerForm").form('reset');
+       	    var result=ids.join(';');
+            $("#accessNumsOwner").textbox('setValue',result);
+       
+           
+        },
+        // 编辑
+        edit:function (id) {
+            var rows=$("#table").datagrid("getSelections");
+            if(rows.length>0){
+            	if(rows.length==1){
+            		var id=rows[0].id;
+            		obj.editOne(id);
+            	}else{
+            		$.messager.alert('信息提示','只能编辑一条数据','info');
+            	}
+            }else{
+                $.messager.alert('信息提示','请选择要修改的记录','info');
+            }
+        },
+        // 编辑
+        editOne:function (id) {
+                $("#res").hide();
+                $("#can").show();
+                $("#addBox").dialog({
+                        closed: false,
+                });
+                
+                $.ajax({
+                	    url:basePath+'/org/find',
+                        type:'POST',
+                        dataType:'json',
+                        data: { 
+                        	id:id
+                        },
+                        success:function (data) {
+                        	$("#id").val(data.model.id);
+                        	$("#orgId").val(data.model.orgId);
+                        	$("#orgName").val(data.model.orgName);
+                        	$("#upOrgId").combobox('setValue', data.model.upOrgId);
+                        }
+                })
+        },
+        // 提交表单
+        sum:function () {
+    	    var valid=$("#addForm").form('enableValidation').form('validate');
+    	    if(valid){
+    	    	$.ajax({            
+	                  type:"POST",   //post提交方式默认是get
+	                  url:basePath+'/iccidmanager/messageSend',
+	                  data:$("#addForm").serialize(),   //序列化               
+	                  error:function(request) {      // 设置表单提交出错                 
+	                      $("#showMsg").html(request);  //登录错误提示信息
+	                  },
+	                  success:function(data) {
+  	                	if(data.sucess!=undefined&&data.sucess==false){
+  	                		$.messager.alert('信息提示',data.msg,'error');
+  	                	}else{
+  	                		$.messager.show({
+	                            title:'提示信息',
+	                            msg:"操作成功"
+	                        })
+	                        obj.can()
+	                        obj.find();
+  	                	}
+	                  }            
+	               });
+    	    }
+        },// 备注
+        sumMark:function(){
+    	    var valid=$("#addMarkForm").form('enableValidation').form('validate');
+    	    if(valid){
+    	    	var rows=$("#table").datagrid("getSelections");
+    	    	var ids=[];
+                for(i=0;i<rows.length;i++){
+                     ids.push(rows[i].id);
+
+                };
+                var mark=$("#mark").val();
+    	    	$.ajax({            
+	                  type:"POST",   //post提交方式默认是get
+	                  url:basePath+'/cardmanager/setMark',
+	                  data:{
+	                	  ids:ids.join(';'),
+	                	  mark:mark
+	                  },         
+	                  error:function(request) {      // 设置表单提交出错                 
+	                      $("#showMsg").html(request);  //登录错误提示信息
+	                  },
+	                  success:function(data) {
+  	                	if(data.sucess!=undefined&&data.sucess==false){
+  	                		$.messager.alert('信息提示',data.msg,'error');
+  	                	}else{
+  	                		$.messager.show({
+	                            title:'提示信息',
+	                            msg:"操作成功"
+	                        })
+	                        obj.canMark()
+	                        obj.find();
+  	                	}
+	                  }            
+	               });
+    	    }
+        },
+        // 划卡
+        sumOwner:function () {
+        	    var valid=$("#addOwnerForm").form('enableValidation').form('validate');
+        	    if(valid){
+        	    	$.ajax({            
+  	                  type:"POST",   //post提交方式默认是get
+  	                  url:basePath+'/xuyucontentcardmgrself/setOwner',
+  	                  data:$("#addOwnerForm").serialize(),   //序列化               
+  	                  error:function(request) {      // 设置表单提交出错                 
+  	                      $("#showMsg").html(request);  //登录错误提示信息
+  	                  },
+  	                  success:function(data) {
+	  	                	if(data.sucess!=undefined&&data.sucess==false){
+	  	                		$.messager.alert('信息提示',data.msg,'error');
+	  	                	}else{
+	  	                		$.messager.show({
+		                            title:'提示信息',
+		                            msg:"操作成功"
+		                        })
+		                        obj.canOwner()
+		                        obj.find();
+	  	                	}
+  	                  }            
+  	               });
+        	    }
+        },
+        // 重置表单
+        res:function () {
+                $("#addForm").form('reset');
+        },
+        // 重置表单
+        queryRes:function () {
+                $("#queryForm").form('reset');
+
+        },
+        // 取消表单
+        can:function () {
+                $("#addBox").dialog({
+                        closed: true
+                })
+        },
+        canOwner:function () {
+            $("#addOwnerBox").dialog({
+                    closed: true
+            })
+        },
+        canMark:function(){
+        	$("#addMarkBox").dialog({
+                 closed: true
+            })
+        },
+        can1:function () {
+            $("#importBox").dialog({
+                    closed: true
+            })
+        },
+        // 删除多个
+        del:function () {
+               var rows=$("#table").datagrid("getSelections");
+               if(rows.length>0){
+                       $.messager.confirm('确定删除','你确定要删除你选择的记录吗？',function (flg) {
+                               if(flg){
+                                       var ids=[];
+                                       for(i=0;i<rows.length;i++){
+                                               ids.push(rows[i].id);
+
+                                       }
+                                       var num=ids.length;
+                                      $.ajax({
+                                              type:'post',
+                                              url:basePath+'/org/delete',
+                                              data:{
+                                                      ids:ids.join(';')
+                                              },
+                                              beforesend:function () {
+                                                      $("#table").datagrid('loading');
+                                                      
+                                              },
+                                              success:function (data) {
+                                                      if(data){
+                                                              $("#table").datagrid('loaded');
+                                                              $("#table").datagrid('load');
+                                                              $("#table").datagrid('unselectAll');
+                                                              $.messager.show({
+                                                                      title:'提示',
+                                                                      msg:num+'个用户被删除'
+                                                              })
+                                                      }
+                                                      else{
+                                                              $.messager.show({
+                                                                      title:'警示信息',
+                                                                      msg:"信息删除失败"
+                                                              })
+                                                      }
+                                              }
+                                      })
+                               }
+
+                       })
+
+               }
+               else{
+                       $.messager.alert('提示','请选择要删除的记录','info');
+               }
+
+        },
+
+        //删除一个
+        delOne:function (id) {
+                id=$("#table").datagrid('getSelected').id;
+                $.messager.confirm('提示信息','是否删除所选择记录',function (flg) {
+                        if(flg){
+                                $.ajax({
+                                        type:'post',
+                                        url:basePath+'/org/delete',
+                                        data:{
+                                        	    ids:id
+                                        },
+                                        beforesend:function () {
+                                                $("#table").datagrid('loading');
+
+                                        },
+                                        success:function (data) {
+                                                if(data){
+                                                        $("#table").datagrid("loaded");
+                                                        $("#table").datagrid("load");
+                                                        $("#table").datagrid("unselectRow");
+                                                        $.messager.show({
+                                                                title:'提示信息',
+                                                                msg:"信息删除成功"
+                                                        })
+                                                }
+                                                else{
+                                                        $.messager.show({
+                                                                title:'警示信息',
+                                                                msg:"信息删除失败"
+                                                        })
+                                                }
+                                        }
+                                })
+                        }
+                })
+        },
+        submitType:function(){
+            $("#importTypeBox").dialog({
+                    closed: false
+            })
+            $("#importTypeForm").form('reset');
+        },
+        import1:function(){
+        	var valid=$("#importTypeForm").form('enableValidation').form('validate');
+     	    if(valid){
+     	    	 if($('#operator').combobox('getText')=='请选择'){
+     	    		alert('运营商为必填');return false;
+     	    	 }
+     	    	 if($('#operator').combobox('getText')=='移动'){
+     	    		 if($('#ownerPlace').combobox('getText')=='请选择'){
+          	    		alert('二级运营商为必填');return false;
+          	    	 }
+     	    	 }
+     	    	 // 关掉运营商选择界面
+     	         $("#importTypeBox").dialog({
+                    closed: true
+                 });
+     	    	 $("#importBox").dialog({
+                     closed: false
+                 })
+                 $("#importForm").form('reset');
+     	    }
+           
+        },
+        importData:function(){
+        	$.ajax({            
+                  type:"POST",   //post提交方式默认是get
+                  url:basePath+'/cardmanager/excelImport',
+                  error:function(request) {      // 设置表单提交出错                 
+                	  $.messager.show({
+                          title:'提示信息',
+                          msg:"操作失败"
+                      })
+                  },
+                  success:function(data) {
+	                  $.messager.show({
+                          title:'提示信息',
+                          msg:"操作成功"
+                      })
+                  }            
+               });
+        },
+        // 提交表单
+        importCsv:function () {
+        	$.ajax({            
+              type:"POST",   //post提交方式默认是get
+                url:bathPath+'/systemannexe/upload',
+                data:{uploadFile:'uploadFile'},   //序列化               
+                error:function(request) {      // 设置表单提交出错                 
+                    $("#showMsg").html(request);  //登录错误提示信息
+                },
+                success:function(data) {
+	                	$.messager.show({
+                        title:'提示信息',
+                        msg:"操作成功"
+                    })
+                    obj.import1()
+                    obj.find();
+                }            
+             });
+        },
+        uploadFile:function(){
+        	    var attach = document.getElementById("uploadFile").value;
+        	    if(attach == undefined || attach == ""){
+        	        alert("请选择文件");
+        	        return;
+        	    }
+        	    
+        	    var operator=$("#operator").combobox('getValue');
+        	    var ownerPlace=$("#ownerPlace").combobox('getValue');
+        	    
+        	    var comboType=$("#comboType").combobox('getValue');
+        	    var waitType=$("#waitType").combobox('getValue');
+        	    var testType=$("#testType").combobox('getValue');
+        	    var cardType=$("#cardType").combobox('getValue');
+        	    var standard=$("#standard").combobox('getValue');
+        	    var unitCost=$("#unitCost").val();
+        	    
+        	    var asyncType="cardImport";
+        	    
+        	    var formData = new FormData();
+        	    formData.append("file",$("#uploadFile")[0].files[0]);
+        	    $.ajax({
+        	    	url:basePath+'/csvoprate/upload?operator='+operator+"&ownerPlace="+ownerPlace+"&asyncType="+asyncType+"&comboType="+comboType+"&waitType="+waitType+"&testType="+testType+"&cardType="+cardType+"&standard="+standard+"&unitCost="+unitCost,
+        	        type:'post',
+        	        data: formData,
+        	        contentType: false,
+        	        processData: false,
+        	        success:function(res){
+        	        	var resp=eval('(' + res+ ')')
+        	        	$.messager.show({
+                          title:'提示信息',
+                          msg:resp.mess
+                       });
+        	        	
+        	           obj.can1();
+        	        }
+        	    })     
+        },// 导出模板
+        loadModel:function(){
+        	var operator=$("#operator").combobox('getValue');
+        	$.ajax({            
+              type:"POST",   //post提交方式默认是get
+                url:basePath+'/xuyucontentcardmgr/exportModel',
+                data:{type:operator},   //序列化               
+                error:function(request) {
+                	$.messager.show({
+                        title:'提示信息',
+                        msg:"操作失败请稍候再试"
+                    });
+                },
+                success:function(data) {
+					var filename = data.filename;
+					var filepath = data.filepath;
+					var filenameCN = data.annexeName;
+					if (filename != null&& filename != ""&& filename != "undfined") {
+						window.open(basePath+'/systemannexe/downFile?filename='+filename+'&annexeName='+encodeURIComponent(filenameCN)+'&uploadPath='+encodeURIComponent(filepath),'_self'); 
+					} else {
+						Ext.MessageBox.alert('信息提示',
+								'文件导出失败，请稍后重试！');
+						return false;
+					}
+                }            
+             });
+        },
+        collapse:function(){
+        	$("#queryMore").show();
+        	$("#a1").hide();
+        	$("#a2").hide();
+        	$("#a3").hide();
+        	
+        	$("#a4").show();
+        	$("#a5").show();
+        	$("#a6").show();
+        	
+
+        	$('#tableFind').attr("style","height:280px;");
+        	var vCenterHeight=document.body.clientHeight-290;
+        	$("#table").datagrid({
+                height: vCenterHeight+"px"
+            });
+        },
+        expand:function(){
+        	$("#queryMore").hide();
+        	$("#a4").hide();
+        	$("#a5").hide();
+        	$("#a6").hide();
+        	
+        	$("#a1").show();
+        	$("#a2").show();
+        	$("#a3").show();
+        	
+        	$('#tableFind').attr("style","height:95px;");
+        	var vCenterHeight=document.body.clientHeight-105;
+        	$("#table").datagrid({
+                height: vCenterHeight+"px"
+            });
+        }, export1:function(){
+        	$.messager.show({
+                title:'提示信息',
+                msg:"导出成功"
+            })
+        }
+}
+
+// 弹出框加载
+$("#addBox").dialog({
+        title:"发送短信",
+        width:500,
+        height:480,
+        closed: true,
+        modal:true,
+        shadow:true
+});
+
+$("#addMarkBox").dialog({
+    title:"备注",
+    width:500,
+    height:280,
+    closed: true,
+    modal:true,
+    shadow:true
+});
+
+
+
+$("#importTypeBox").dialog({
+        title:"选择卡信息",
+        width:600,
+        height:500,
+        closed: true,
+        modal:true,
+        shadow:true
+})
+
+
+// 弹出框加载
+$("#importBox").dialog({
+        title:"批量导入",
+        width:500,
+        height:200,
+        closed: true,
+        modal:true,
+        shadow:true
+})
+
+
+$("#addOwnerBox").dialog({
+    title:"划卡",
+    width:598,
+    height:480,
+    closed: true,
+    modal:true,
+    shadow:true
+});
+
+
+function openOwner(){
+	var  url = basePath + "/XuYuRepos/manager/groupChoose.jsp";
+	var iWidth=1000; //弹出窗口的宽度;
+    var iHeight=750; //弹出窗口的高度;
+    var iTop = (window.screen.availHeight-30-iHeight)/2; //获得窗口的垂直位置;
+    var iLeft = (window.screen.availWidth-10-iWidth)/2; //获得窗口的水平位置;
+	window.open('','newOwnerWin',"height="+iHeight+", width="+iWidth+", top="+iTop+", left="+iLeft+",toolbar=no, menubar=no,  scrollbars=yes,resizable=yes,location=no, status=no");  
+	$("#openOwnerForm").submit();  
+};
+

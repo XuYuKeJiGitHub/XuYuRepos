@@ -1,0 +1,13 @@
+package com.xuyurepos.dao.system;
+
+import java.util.List;
+
+import com.xuyurepos.entity.system.SystemAnnexe;
+
+public interface SystemAnnexeDao {
+	
+	public List<SystemAnnexe> getList(SystemAnnexe systemAnnexe);
+	
+
+
+}

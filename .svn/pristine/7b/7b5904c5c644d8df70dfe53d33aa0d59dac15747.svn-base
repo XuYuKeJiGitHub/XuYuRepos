@@ -1,0 +1,47 @@
+package com.xuyurepos.controller.cardmanager;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSONObject;
+import com.xuyurepos.common.exception.BizException;
+import com.xuyurepos.common.log.LoggerFactory;
+import com.xuyurepos.service.manager.ImportTempService;
+import com.xuyurepos.vo.system.SystemFunctionVo;
+
+@Controller
+@RequestMapping(value = "/cardmanager")
+public class CardManagerControl {
+	@Resource
+	private ImportTempService importTempService; 
+	
+	@Resource
+	private BizException bizException; 
+	
+	Logger log=LoggerFactory.getInstance().getLogger(CardManagerControl.class);
+	
+	// 保存
+	@RequestMapping(value = "/excelImport", produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String save(SystemFunctionVo systemLookUpVo, HttpServletRequest request) throws Exception {
+		try {
+			Map<String, Object> map = new HashMap<String, Object>();
+			importTempService.anaLysisData("");
+			map.put("sucess", true);
+			String result = JSONObject.toJSONString(map);
+			return result;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+}

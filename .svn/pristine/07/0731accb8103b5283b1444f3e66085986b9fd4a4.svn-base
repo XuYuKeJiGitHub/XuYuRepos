@@ -1,0 +1,12 @@
+package com.xuyurepos.service.manager;
+
+/**
+ * 临时表导入的service
+ * @author yangfei
+ *
+ */
+public interface ImportTempService {
+	
+	public void anaLysisData();
+
+}

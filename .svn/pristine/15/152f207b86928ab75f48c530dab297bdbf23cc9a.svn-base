@@ -1,0 +1,140 @@
+package com.xuyurepos.vo.manager;
+
+/**
+ * 卡出库管理
+ * @author yangfei
+ */
+public class XuyuContentCardMgrSelfVo {
+
+	private String id;
+
+	private String accessNum;
+
+	private String accessNumStart;
+
+	private String accessNumEnd;
+
+	private String establishDateStart;
+
+	private String establishDateEnd;
+	
+	private String accessNums;
+	
+	private String agency;
+	
+	private String agencyName;
+	
+	private String unitCost;
+	
+	private String owner;
+	
+	private String ownerName;
+	
+	private String yesNo;
+	
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getAccessNum() {
+		return accessNum;
+	}
+
+	public void setAccessNum(String accessNum) {
+		this.accessNum = accessNum;
+	}
+
+	public String getAccessNumStart() {
+		return accessNumStart;
+	}
+
+	public void setAccessNumStart(String accessNumStart) {
+		this.accessNumStart = accessNumStart;
+	}
+
+	public String getAccessNumEnd() {
+		return accessNumEnd;
+	}
+
+	public void setAccessNumEnd(String accessNumEnd) {
+		this.accessNumEnd = accessNumEnd;
+	}
+
+	public String getEstablishDateStart() {
+		return establishDateStart;
+	}
+
+	public void setEstablishDateStart(String establishDateStart) {
+		this.establishDateStart = establishDateStart;
+	}
+
+	public String getEstablishDateEnd() {
+		return establishDateEnd;
+	}
+
+	public void setEstablishDateEnd(String establishDateEnd) {
+		this.establishDateEnd = establishDateEnd;
+	}
+
+	public String getAccessNums() {
+		return accessNums;
+	}
+
+	public void setAccessNums(String accessNums) {
+		this.accessNums = accessNums;
+	}
+
+	public String getAgency() {
+		return agency;
+	}
+
+	public void setAgency(String agency) {
+		this.agency = agency;
+	}
+
+	public String getAgencyName() {
+		return agencyName;
+	}
+
+	public void setAgencyName(String agencyName) {
+		this.agencyName = agencyName;
+	}
+
+	public String getUnitCost() {
+		return unitCost;
+	}
+
+	public void setUnitCost(String unitCost) {
+		this.unitCost = unitCost;
+	}
+
+	public String getYesNo() {
+		return yesNo;
+	}
+
+	public void setYesNo(String yesNo) {
+		this.yesNo = yesNo;
+	}
+
+	public String getOwner() {
+		return owner;
+	}
+
+	public void setOwner(String owner) {
+		this.owner = owner;
+	}
+
+	public String getOwnerName() {
+		return ownerName;
+	}
+
+	public void setOwnerName(String ownerName) {
+		this.ownerName = ownerName;
+	}
+	
+}

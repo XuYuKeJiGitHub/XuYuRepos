@@ -1,0 +1,96 @@
+package com.xuyurepos.service.impl.manager;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.xuyurepos.common.SpringTool;
+import com.xuyurepos.common.analysis.LargeExcelFileRead;
+import com.xuyurepos.common.log.LoggerFactory;
+import com.xuyurepos.dao.manager.ImportTempDao;
+import com.xuyurepos.entity.manager.ImportTemp;
+
+/**
+ * excel解析类
+ * @author yangfei
+ */
+@Transactional
+@Service
+public class ImportTempExcelParse extends LargeExcelFileRead{
+	
+	Logger logger=LoggerFactory.getInstance().getLogger(ImportTempServiceImpl.class);
+	
+	@Resource
+	private ImportTempDao importTempDao;
+	
+	public void anaLysisData(String fileName) {
+		try {
+			logger.info("开始解析");
+			Long time=System.currentTimeMillis();
+			importTempDao.truncateTable();
+			ImportTempExcelParse excelFileReadUtil=new ImportTempExcelParse();
+			excelFileReadUtil.processAllSheets(fileName);
+			Long endtime=System.currentTimeMillis();
+			logger.info("耗时"+(endtime-time)/1000+"秒");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+
+	@Override
+	protected void dealData(LinkedHashMap<String, String> map, int i) {
+		try {
+			if(importTempDao==null){
+				importTempDao=(ImportTempDao) SpringTool.getBean("importTempDao");
+			}
+			Iterator<Entry<String, String>> it= map.entrySet().iterator();
+			int count=0;
+		    String prePos="";
+		    ImportTemp orgVo=new ImportTemp();
+		    List<ImportTemp> list=new ArrayList<ImportTemp>();
+		    Boolean hasData=false;
+			while (it.hasNext()){
+	            Map.Entry<String, String> entry=(Map.Entry<String, String>)it.next();
+	            String pos=entry.getKey();
+	            if(!pos.substring(1).equals(prePos)){
+	                prePos=pos.substring(1);
+	                count++;
+	                if(count!=1){
+	                	 list.add(orgVo);
+	                	 orgVo=new ImportTemp();
+	                }
+	                if(count!=0&&count%100==0){
+	                	importTempDao.insertByBatch(list);
+	                	list.clear();
+	                }
+	            }
+	            BeanUtils.setProperty(orgVo,pos.substring(0,1).toLowerCase(),entry.getValue());
+	            hasData=true;
+	        }
+			if(hasData==true){
+				list.add(orgVo);
+				importTempDao.insertByBatch(list);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void main(String[] args) {
+		System.out.println(100%100);
+	}
+
+
+
+}

@@ -1,0 +1,33 @@
+/**
+ * Project Name:XuYuRepos
+ * File Name:TestJSCMPRequest.java
+ * Package Name:com.xuyurepos.service.intergration.xuyu.facade
+ * Date:2019年3月28日上午9:16:29
+ * Copyright (c) 2019, chenzhou1025@126.com All Rights Reserved.
+ *
+*/
+
+package com.xuyurepos.service.intergration.xuyu.cmp;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import com.xuyurepos.common.util.httpclient.HttpTookit;
+
+/**
+ * ClassName:TestJSCMPRequest <br/>
+ * Function: TODO ADD FUNCTION. <br/>
+ * Reason:	 TODO ADD REASON. <br/>
+ * Date:     2019年3月28日 上午9:16:29 <br/>
+ * @author   zhangliang
+ * @version  
+ * @since    JDK 1.8
+ * @see 	 
+ */
+public class TestJSCMPRequest {
+
+	public static void main(String[] args) {
+		
+	}
+}
+

@@ -1,0 +1,147 @@
+package com.xuyurepos.service.impl.manager;
+
+import java.util.Date;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import com.xuyurepos.common.constants.SystemConstants;
+import com.xuyurepos.common.exception.CustomException;
+import com.xuyurepos.common.log.LoggerFactory;
+import com.xuyurepos.common.page.PageModel;
+import com.xuyurepos.dao.manager.XuyuContentCardInfoDao;
+import com.xuyurepos.dao.manager.XuyuContentCardMgrDao;
+import com.xuyurepos.dao.manager.XuyuMessageLogDao;
+import com.xuyurepos.entity.manager.XuyuContentCardInfo;
+import com.xuyurepos.entity.manager.XuyuMessageLog;
+import com.xuyurepos.entity.system.SystemUser;
+import com.xuyurepos.service.intergration.facade.SynInfoFacadeService;
+import com.xuyurepos.service.intergration.facade.SynInfoJSFacadeService;
+import com.xuyurepos.service.manager.IccIdManagerService;
+import com.xuyurepos.service.system.SystemOrgService;
+import com.xuyurepos.vo.manager.XuyuContentCardMgrSelfVo;
+import com.xuyurepos.vo.manager.XuyuMessageLogVo;
+import com.xuyurepos.vo.system.SystemOrgVo;
+@Transactional
+@Service
+public class IccIdManagerServiceImpl implements IccIdManagerService{
+	Logger logger=LoggerFactory.getInstance().getLogger(IccIdManagerServiceImpl.class);
+
+	@Resource
+	private XuyuContentCardMgrDao xuyuContentCardMgrDao;
+	@Resource
+	private XuyuContentCardInfoDao xuyuContentCardInfoDao;
+	
+	@Resource
+	private XuyuMessageLogDao messageLogDao;
+	
+	@Resource
+	private SystemOrgService systemOrgService;
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public void findList(PageModel pageModel) {
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+		SystemUser systemUser=(SystemUser) request.getSession().getAttribute("systemUser");
+		String orgId=systemUser.getOrgId();
+		// 查找机构信息
+		SystemOrgVo systemOrgVo=systemOrgService.find(orgId);
+		if(systemOrgVo.getOrgLevel().equals("1")){
+			// 代理商用户开始划卡
+			logger.info("总部物联卡信息查询");
+			XuyuContentCardMgrSelfVo xuyuContentCardMgrSelfVo=(XuyuContentCardMgrSelfVo)pageModel.getQueryObj();
+			String agency=systemOrgVo.getOrgId();
+			logger.info("agency:"+agency);
+			xuyuContentCardMgrSelfVo.setAgency(agency);
+			pageModel.setRows(xuyuContentCardInfoDao.selectUserListWithPage(pageModel));
+		    pageModel.setTotal(xuyuContentCardInfoDao.selectUserCountWithPage(pageModel));
+		}else{
+			// 代理商用户开始划卡
+			logger.info("代理商物联卡信息查询");
+			XuyuContentCardMgrSelfVo xuyuContentCardMgrSelfVo=(XuyuContentCardMgrSelfVo)pageModel.getQueryObj();
+			String agency=systemOrgVo.getOrgId();
+			if(systemOrgVo.getOrgLevel().equals("2")){
+				agency=agency.substring(0,agency.length()-1);
+			}
+			logger.info("agency:"+agency);
+			xuyuContentCardMgrSelfVo.setAgency(agency);
+			pageModel.setRows(xuyuContentCardInfoDao.selectUserListWithPage(pageModel));
+		    pageModel.setTotal(xuyuContentCardInfoDao.selectUserCountWithPage(pageModel));
+		}
+		
+	}
+    
+	/***
+	 * 发送短信
+	 */
+	@Override
+	public void messageSend(XuyuMessageLogVo xuyuMessageLogVo) throws CustomException {
+		String accessNums=xuyuMessageLogVo.getAccessNums();
+		String message=xuyuMessageLogVo.getMessage();
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+		SystemUser systemUser=(SystemUser) request.getSession().getAttribute("systemUser");
+		if(accessNums!=null&&!SystemConstants.STRINGEMPTY.equals(accessNums)){
+			String[] accessNumStr=accessNums.split(";");
+			if(accessNumStr.length>0){
+				XuyuMessageLog xuyuMessageLog=null;
+				SynInfoFacadeService synInfoFacadeService=SynInfoFacadeService.getInstance();
+				SynInfoJSFacadeService synInfoJSFacadeService=SynInfoJSFacadeService.getInstance();
+				for (int i = 0; i < accessNumStr.length; i++) {
+					XuyuContentCardInfo contentCardInfo=xuyuContentCardInfoDao.find(accessNumStr[i]);
+					if(contentCardInfo!=null){
+						String ownerPlace=contentCardInfo.getOwnerPlace();
+						// 判定是否存在二级运营商
+						if(ownerPlace==null||SystemConstants.STRINGEMPTY.equals(ownerPlace)){
+							// 先保存数据
+							xuyuMessageLog=new XuyuMessageLog();
+							xuyuMessageLog.setProvider(contentCardInfo.getProvider());
+							xuyuMessageLog.setOwnerPlace(SystemConstants.STRINGEMPTY);
+							xuyuMessageLog.setAccessNum(contentCardInfo.getAccessNum());
+							xuyuMessageLog.setCreateTime(new Date());
+							xuyuMessageLog.setCreateUser(systemUser.getUserName());
+							xuyuMessageLog.setCreateUserName(systemUser.getCname());
+							xuyuMessageLog.setMessage(message);
+							messageLogDao.insert(xuyuMessageLog);
+							// 判定运营商
+							if("1".equals(contentCardInfo.getProvider())){// 移动
+								synInfoFacadeService.mobileMessageSendService(contentCardInfo.getImsi(), message);
+							}else if("2".equals(contentCardInfo.getProvider())){//联通
+								synInfoFacadeService.unicomMessageSendService(contentCardInfo.getIccid(), message);
+							}else{
+								// 电信直接报错
+								throw new CustomException("电信卡不能发送短信");
+							}
+						}else{
+							// 先保存数据
+							xuyuMessageLog=new XuyuMessageLog();
+							xuyuMessageLog.setProvider(contentCardInfo.getProvider());
+							xuyuMessageLog.setOwnerPlace(ownerPlace);
+							xuyuMessageLog.setAccessNum(contentCardInfo.getAccessNum());
+							xuyuMessageLog.setCreateTime(new Date());
+							xuyuMessageLog.setCreateUser(systemUser.getUserName());
+							xuyuMessageLog.setCreateUserName(systemUser.getCname());
+							xuyuMessageLog.setMessage(message);
+							messageLogDao.insert(xuyuMessageLog);
+							// 分别判定
+							if("1".equals(ownerPlace)){// 淮安
+								synInfoJSFacadeService.mobileMessageSendService(contentCardInfo.getImsi(), message, ownerPlace);
+							}else if("2".equals(ownerPlace)){// 盐城
+								synInfoJSFacadeService.mobileMessageSendService(contentCardInfo.getImsi(), message, ownerPlace);
+							}else{// 其他
+								synInfoFacadeService.mobileMessageSendService(contentCardInfo.getImsi(), message);
+							}
+						}
+					}
+				}
+			}
+		}
+		
+	}
+
+}

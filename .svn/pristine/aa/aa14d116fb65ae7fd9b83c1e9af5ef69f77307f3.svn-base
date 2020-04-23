@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper  
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuyurepos.dao.manager.XuyuContentCardMgrDao">
+	<cache></cache>
+	<resultMap type="com.xuyurepos.entity.manager.XuyuContentCardMgr" id="xuyuContentCardMgr">
+		<!-- column存数据库中的属性   property存javabean中数据-->
+		 <id column="ID" jdbcType="VARCHAR" property="id" />
+	    <result column="ACCESS_NUM" jdbcType="VARCHAR" property="accessNum" />
+	    <result column="ICCID" jdbcType="VARCHAR" property="iccid" />
+	    <result column="IMSI" jdbcType="VARCHAR" property="imsi" />
+	    <result column="PROVIDER" jdbcType="VARCHAR" property="provider" />
+	    <result column="AGENCY" jdbcType="VARCHAR" property="agency" />
+	    <result column="AGENCY_NAME" jdbcType="VARCHAR" property="agencyName" />
+	    <result column="CARD_KIND" jdbcType="VARCHAR" property="cardKind" />
+	    <result column="BILLING_STATUS" jdbcType="VARCHAR" property="billingStatus" />
+	    <result column="COMBO_TYPE" jdbcType="VARCHAR" property="comboType" />
+	    <result column="COMNO_NAME" jdbcType="VARCHAR" property="comnoName" />
+	    <result column="TOTAL_GPRS" jdbcType="DECIMAL" property="totalGprs" />
+	    <result column="REMAIN_GPS" jdbcType="DECIMAL" property="remainGps" />
+	    <result column="USE_GPRS" jdbcType="DECIMAL" property="useGprs" />
+	    <result column="MESSAGE_COUNT" jdbcType="INTEGER" property="messageCount" />
+	    <result column="ESTABLISH_DATE" jdbcType="DATE" property="establishDate" />
+	    <result column="ACTIVATE_DATE" jdbcType="DATE" property="activateDate" />
+	    <result column="DEADLINE_DATE" jdbcType="TIMESTAMP" property="deadlineDate" />
+	    <result column="WAIT_TYPE" jdbcType="VARCHAR" property="waitType" />
+	    <result column="WAIT_DATE" jdbcType="TIMESTAMP" property="waitDate" />
+	    <result column="WORKING_CONDITION" jdbcType="VARCHAR" property="workingCondition" />
+	    <result column="OWNER" jdbcType="VARCHAR" property="owner" />
+	    <result column="PAYMENT_TYPE" jdbcType="VARCHAR" property="paymentType" />
+	    <result column="REAL_ESTABLISH" jdbcType="TIMESTAMP" property="realEstablish" />
+	    <result column="REAL_ACTIVATE" jdbcType="TIMESTAMP" property="realActivate" />
+	    <result column="REAL_DEADLINE" jdbcType="TIMESTAMP" property="realDeadline" />
+	    <result column="REAL_COMBOTYPE" jdbcType="VARCHAR" property="realCombotype" />
+	    <result column="REAL_COMBONAME" jdbcType="VARCHAR" property="realComboname" />
+	    <result column="UNIT_COST" jdbcType="DECIMAL" property="unitCost" />
+	    <result column="MONTH_FEE" jdbcType="DECIMAL" property="monthFee" />
+	    <result column="AGENCY_FEE" jdbcType="DECIMAL" property="agencyFee" />
+	    <result column="REVENUE_FEE" jdbcType="DECIMAL" property="revenueFee" />
+	    <result column="LASTMONTH_FEE" jdbcType="DECIMAL" property="lastmonthFee" />
+	    <result column="REMAIN_FEE" jdbcType="DECIMAL" property="remainFee" />
+	    <result column="REAL_PROFIT" jdbcType="DECIMAL" property="realProfit" />
+	    <result column="AGENCY_PROFIT" jdbcType="DECIMAL" property="agencyProfit" />
+	    <result column="MARK" jdbcType="VARCHAR" property="mark" />
+	    <result column="PARENT_AGENTCY" jdbcType="VARCHAR" property="parentAgentcy" />
+	    <result column="MARK_FIRST" jdbcType="VARCHAR" property="markFirst" />
+	    <result column="MARK_PROFIT" jdbcType="DECIMAL" property="markProfit" />
+	    <result column="CREATE_DATE" jdbcType="TIMESTAMP" property="createDate" />
+	    <result column="CREATE_USER" jdbcType="VARCHAR" property="createUser" />
+	    <result column="UPDATE_DATE" jdbcType="TIMESTAMP" property="updateDate" />
+	    <result column="UPDATE_USER" jdbcType="VARCHAR" property="updateUser" />
+	    <result column="IMPORT_BATCHNO" jdbcType="VARCHAR" property="importBatchno" />
+	    <result column="EXPORT_BATCHNO" jdbcType="VARCHAR" property="exportBatchno" />
+	    <result column="MANAGER_FLAG" jdbcType="VARCHAR" property="managerFlag" />
+	</resultMap>
+	
+	 <insert id="insertYd" parameterType="String">
+			insert into XUYU_CONTENT_CARD_MGR(ID,PROVIDER,OWNER_PLACE,ACCESS_NUM,ICCID,IMSI,REAL_ESTABLISH,REAL_ACTIVATE,MARK,IMPORT_BATCHNO)  
+			( select _nextval('seq'),#{ownerPlace,javaType=String},#{operator,javaType=String} ,t1.A,t1.C,t1.D,STR_TO_DATE(if(t1.E='', null , t1.E),'%Y-%m-%d'),STR_TO_DATE(if(t1.F='', null , t1.F),'%Y-%m-%d'),t1.B,#{batchNo,javaType=String} from IMPORT_TEMP t1 ) 
+     </insert>
+     
+     <insert id="insertLt" parameterType="String">
+			insert into XUYU_CONTENT_CARD_MGR(ID,PROVIDER,OWNER_PLACE,ACCESS_NUM,ICCID,IMPORT_BATCHNO)  
+			( select _nextval('seq'),#{operator,javaType=String},'',t1.B,t1.A,#{batchNo,javaType=String} from IMPORT_TEMP t1 ) 
+     </insert>
+     
+     <insert id="insertDx" parameterType="String">
+			insert into XUYU_CONTENT_CARD_MGR(ID,PROVIDER,OWNER_PLACE,ACCESS_NUM,ICCID,IMSI,REAL_ESTABLISH,REAL_ACTIVATE,IMPORT_BATCHNO)  
+			( select _nextval('seq'),#{operator,javaType=String},'',t1.B,t1.A,t1.D,STR_TO_DATE(if(t1.E='', null , t1.E),'%Y-%m-%d'),STR_TO_DATE(if(t1.F='', null , t1.F),'%Y-%m-%d'),#{batchNo,javaType=String} from IMPORT_TEMP t1 ) 
+     </insert>
+     
+    <update id="update" parameterType="com.xuyurepos.entity.manager.XuyuContentCardMgr">
+    update XUYU_CONTENT_CARD_MGR
+    set ACCESS_NUM = #{accessNum,jdbcType=VARCHAR},
+      ICCID = #{iccid,jdbcType=VARCHAR},
+      IMSI = #{imsi,jdbcType=VARCHAR},
+      PROVIDER = #{provider,jdbcType=VARCHAR},
+      AGENCY = #{agency,jdbcType=VARCHAR},
+      AGENCY_NAME = #{agencyName,jdbcType=VARCHAR},
+      CARD_KIND = #{cardKind,jdbcType=VARCHAR},
+      BILLING_STATUS = #{billingStatus,jdbcType=VARCHAR},
+      COMBO_TYPE = #{comboType,jdbcType=VARCHAR},
+      COMNO_NAME = #{comnoName,jdbcType=VARCHAR},
+      TOTAL_GPRS = #{totalGprs,jdbcType=DECIMAL},
+      REMAIN_GPS = #{remainGps,jdbcType=DECIMAL},
+      USE_GPRS = #{useGprs,jdbcType=DECIMAL},
+      MESSAGE_COUNT = #{messageCount,jdbcType=INTEGER},
+      ESTABLISH_DATE = #{establishDate,jdbcType=DATE},
+      ACTIVATE_DATE = #{activateDate,jdbcType=DATE},
+      DEADLINE_DATE = #{deadlineDate,jdbcType=TIMESTAMP},
+      WAIT_TYPE = #{waitType,jdbcType=VARCHAR},
+      WAIT_DATE = #{waitDate,jdbcType=TIMESTAMP},
+      WORKING_CONDITION = #{workingCondition,jdbcType=VARCHAR},
+      OWNER = #{owner,jdbcType=VARCHAR},
+      PAYMENT_TYPE = #{paymentType,jdbcType=VARCHAR},
+      REAL_ESTABLISH = #{realEstablish,jdbcType=TIMESTAMP},
+      REAL_ACTIVATE = #{realActivate,jdbcType=TIMESTAMP},
+      REAL_DEADLINE = #{realDeadline,jdbcType=TIMESTAMP},
+      REAL_COMBOTYPE = #{realCombotype,jdbcType=VARCHAR},
+      REAL_COMBONAME = #{realComboname,jdbcType=VARCHAR},
+      UNIT_COST = #{unitCost,jdbcType=DECIMAL},
+      MONTH_FEE = #{monthFee,jdbcType=DECIMAL},
+      AGENCY_FEE = #{agencyFee,jdbcType=DECIMAL},
+      REVENUE_FEE = #{revenueFee,jdbcType=DECIMAL},
+      LASTMONTH_FEE = #{lastmonthFee,jdbcType=DECIMAL},
+      REMAIN_FEE = #{remainFee,jdbcType=DECIMAL},
+      REAL_PROFIT = #{realProfit,jdbcType=DECIMAL},
+      AGENCY_PROFIT = #{agencyProfit,jdbcType=DECIMAL},
+      MARK = #{mark,jdbcType=VARCHAR},
+      PARENT_AGENTCY = #{parentAgentcy,jdbcType=VARCHAR},
+      MARK_FIRST = #{markFirst,jdbcType=VARCHAR},
+      MARK_PROFIT = #{markProfit,jdbcType=DECIMAL},
+      CREATE_DATE = #{createDate,jdbcType=TIMESTAMP},
+      CREATE_USER = #{createUser,jdbcType=VARCHAR},
+      UPDATE_DATE = #{updateDate,jdbcType=TIMESTAMP},
+      UPDATE_USER = #{updateUser,jdbcType=VARCHAR},
+      IMPORT_BATCHNO = #{importBatchno,jdbcType=VARCHAR},
+      EXPORT_BATCHNO = #{exportBatchno,jdbcType=VARCHAR},
+      MANAGER_FLAG = #{managerFlag,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  
+   <update id="updateInfo" parameterType="hashmap">
+	   update XUYU_CONTENT_CARD_MGR t1 set 
+	   t1.AGENCY=#{xuyuContentCardMgr.agency,jdbcType=VARCHAR},
+	   t1.AGENCY_NAME=#{xuyuContentCardMgr.agencyName,jdbcType=VARCHAR},
+	   t1.MANAGER_FLAG=#{xuyuContentCardMgr.managerFlag,jdbcType=VARCHAR}
+	    where 1=1  
+	   AND ACCESS_NUM &gt;= #{accessNumStart,jdbcType=VARCHAR}
+	   and ACCESS_NUM &lt;= #{accessNumEnd,jdbcType=VARCHAR} 
+  </update>
+    
+     <sql id="sql_count">
+        SELECT COUNT(*)
+    </sql>
+    
+    <sql id="sql_select">
+        SELECT *
+    </sql>
+    
+    <sql id="sql_where">
+        FROM XUYU_CONTENT_CARD_MGR
+        <where>
+            <if test="queryObj != null">
+                <if test="queryObj.funcName != null and queryObj.funcName != ''">
+                    AND FUNC_NAME like 
+                    '%${queryObj.funcName}%'
+                </if>
+                <if test="queryObj.funcDesc != null and queryObj.funcDesc != ''">
+                    AND FUNC_DESC like 
+                    '%${queryObj.funcDesc}%'
+                </if>
+                <if test="queryObj.action != null and queryObj.action != ''">
+                    AND ACTION like 
+                    '%${queryObj.action}%'
+                </if>
+            </if>
+        </where>
+    </sql>
+    
+    <sql id="sql_where_self">
+        FROM XUYU_CONTENT_CARD_MGR
+        <where>
+            <if test="queryObj != null">
+                <if test="queryObj.accessNum != null and queryObj.accessNum != ''">
+                    AND ACCESS_NUM like 
+                    '%${queryObj.accessNum}%'
+                </if>
+                <if test="queryObj.accessNumStart != null and queryObj.accessNumStart != ''">
+                    AND ACCESS_NUM &gt;= ${queryObj.accessNumStart}
+                </if>
+                <if test="queryObj.accessNumEnd != null and queryObj.accessNumEnd != ''">
+                    AND ACCESS_NUM &lt;= ${queryObj.accessNumEnd}
+                </if>
+                <if test="queryObj.establishDateStart != null and queryObj.establishDateStart != ''">
+                    AND ESTABLISH_DATE &gt;= str_to_date(${queryObj.establishDateStart},'%Y-%m-%d %H')
+                </if>
+                <if test="queryObj.establishDateEnd != null and queryObj.establishDateEnd != ''">
+                    AND ESTABLISH_DATE &lt; str_to_date(${queryObj.establishDateEnd},'%Y-%m-%d %H')
+                </if>
+            </if>
+        </where>
+         order by ACCESS_NUM
+    </sql>
+    
+     <select id="find" parameterType="String" resultType="com.xuyurepos.entity.manager.XuyuContentCardMgr">
+          select * from XUYU_CONTENT_CARD_MGR t1 where t1.ACCESS_NUM=#{id}
+    </select>
+    
+   <select id="selectUserListWithPage" parameterType="com.xuyurepos.common.page.PageModel" resultType="com.xuyurepos.entity.manager.XuyuContentCardMgr">
+        <include refid="sql_select"></include>
+        <include refid="sql_where"></include>
+        <if test="pageNumber != null and  pageSize!= null">
+            limit #{startRow},#{pageSize}
+        </if>
+    </select>
+
+    <select id="selectUserCountWithPage" parameterType="com.xuyurepos.common.page.PageModel" resultType="Integer">
+        <include refid="sql_count"></include>
+        <include refid="sql_where"></include>
+    </select>
+    
+     <select id="selectListWithPage" parameterType="com.xuyurepos.common.page.PageModel" resultType="com.xuyurepos.entity.manager.XuyuContentCardMgr">
+        <include refid="sql_select"></include>
+        <include refid="sql_where_self"></include>
+        <if test="pageNumber != null and  pageSize!= null">
+            limit #{startRow},#{pageSize}
+        </if>
+    </select>
+
+    <select id="selectCountWithPage" parameterType="com.xuyurepos.common.page.PageModel" resultType="Integer">
+        <include refid="sql_count"></include>
+        <include refid="sql_where_self"></include>
+    </select>
+     
+</mapper>

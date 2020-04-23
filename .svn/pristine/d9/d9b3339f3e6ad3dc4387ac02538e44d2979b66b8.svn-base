@@ -1,0 +1,4 @@
+#系统默认配置文件
+uploadPath=E:\\upload
+importPath=E:\\import
+maxUploadFileSize=100000000

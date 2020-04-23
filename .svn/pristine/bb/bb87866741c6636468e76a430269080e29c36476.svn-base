@@ -1,0 +1,149 @@
+/**
+ * Project Name:XuYuRepos
+ * File Name:SynInfoBatchService.java
+ * Package Name:com.xuyurepos.service.intergration.batch
+ * Date:2019年4月2日下午1:24:36
+ * Copyright (c) 2019, chenzhou1025@126.com All Rights Reserved.
+ *
+*/
+
+package com.xuyurepos.service.intergration.batch;
+
+import java.net.InetAddress;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.xuyurepos.dao.batch.CardStateChangeDao;
+import com.xuyurepos.entity.manager.XuyuContentCardInfo;
+import com.xuyurepos.service.intergration.facade.SynInfoFacadeService;
+import com.xuyurepos.service.intergration.facade.SynInfoJSFacadeService;
+
+/**
+ * ClassName:SynInfoBatchService <br/>
+ * Function: TODO ADD FUNCTION. <br/>
+ * Reason: TODO ADD REASON. <br/>
+ * Date: 2019年4月2日 下午1:24:36 <br/>
+ * 
+ * @author zhangliang
+ * @version
+ * @since JDK 1.8
+ * @see
+ */
+@Service
+public class SynInfoBatchService {
+
+	static Logger logger = LoggerFactory.getLogger(SynInfoBatchService.class);
+
+	@Autowired
+	private CardStateChangeDao cardInfoDao;
+
+	private ExecutorService execute = Executors.newFixedThreadPool(10);
+
+	private String startFlag = "";
+
+	@Transactional
+	public void sync() {
+		try {
+			String address = InetAddress.getLocalHost().getHostAddress();
+			logger.info("当前服务器IP地址：" + address);
+//				if(!address.equals("172.19.182.120")) {
+//					return ;
+//				}
+			updateCardState(100);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private List queryData(int flag, int limitSize) {
+		List<XuyuContentCardInfo> cardInfoList = cardInfoDao.queryData(flag, limitSize);
+		return cardInfoList;
+	}
+
+	private void updateCardState(int limitSize) throws InterruptedException {
+
+		List<XuyuContentCardInfo> mobileCardInfoList = queryData(1, limitSize);
+
+		for (XuyuContentCardInfo info : mobileCardInfoList) {
+			execute.execute(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					String id = info.getId();
+					String ownerPlace = info.getOwnerPlace();
+					String status = "";
+					String accessNum = info.getAccessNum();
+					if (ownerPlace.equals("1") || ownerPlace.equals("2")) {
+						status = SynInfoJSFacadeService.getInstance().mobileUserStatusQuery(accessNum, ownerPlace);
+					} else {
+						status = SynInfoFacadeService.getInstance().mobileUserStatusQuery(accessNum);
+					}
+					if (StringUtils.isNotBlank(status) && !"null".equals(status)) {
+						cardInfoDao.updateDataState(id, status);
+					}
+
+				}
+			});
+		}
+
+		List<XuyuContentCardInfo> uncomCardInfoList = queryData(2, limitSize);
+
+		for (XuyuContentCardInfo info : uncomCardInfoList) {
+			execute.execute(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					String id = info.getId();
+					String accid = info.getIccid();
+					String status = SynInfoFacadeService.getInstance().unicomUserStatusQuery(accid);
+					if (StringUtils.isNotBlank(status) && !"null".equals(status)) {
+						cardInfoDao.updateDataState(id, status);
+					}
+				}
+			});
+		}
+
+		List<XuyuContentCardInfo> teleCardInfoList = queryData(3, limitSize);
+
+		for (XuyuContentCardInfo info : teleCardInfoList) {
+			execute.execute(new Runnable() {
+
+				@Override
+				public void run() {
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					String id = info.getId();
+					String accessNum = info.getAccessNum();
+					String status = SynInfoFacadeService.getInstance().telecomUserStatusQuery(accessNum);
+					if (StringUtils.isNotBlank(status) && !"null".equals(status)) {
+						cardInfoDao.updateDataState(id, status);
+					}
+				}
+			});
+		}
+
+	}
+
+}

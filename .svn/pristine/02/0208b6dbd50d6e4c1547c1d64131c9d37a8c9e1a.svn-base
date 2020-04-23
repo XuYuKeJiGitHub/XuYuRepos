@@ -1,0 +1,43 @@
+package com.xuyurepos.control.system;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSONObject;
+import com.xuyurepos.common.exception.BizException;
+import com.xuyurepos.common.util.ComboBoxUtils;
+import com.xuyurepos.service.system.SystemLookUpItemService;
+
+@Controller
+@RequestMapping(value = "/lookUp")
+public class SystemLookUpItemControl {
+	
+	@Resource
+	private SystemLookUpItemService itemService; 
+	
+	@Resource
+	private BizException bizException; 
+	
+	@RequestMapping(value="/findInstitution",produces="application/json;charset=UTF-8")
+	@ResponseBody
+    public String findInstitution(HttpServletRequest request,HttpServletResponse response){
+        try{
+        	String fLookUpId=request.getParameter("fLookUpId");
+        	List<ComboBoxUtils> dataList =itemService.findList(fLookUpId);
+        	String result=JSONObject.toJSONString(dataList);
+			return result;
+        }catch(Exception ex){
+        	ex.printStackTrace();
+        	bizException.resolveException(request, response, 1011, ex);
+			return null;
+        }
+    }
+
+}

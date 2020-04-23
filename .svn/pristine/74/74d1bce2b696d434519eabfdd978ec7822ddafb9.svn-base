@@ -1,0 +1,16 @@
+package com.xuyurepos.dao.manager;
+
+/**
+ * 物联卡信息数据插入
+ * @author yangfei
+ *
+ */
+public interface XuyuContentCardInfoDao {
+	
+	/**
+	 * 将导入临时表的数据插入目标表
+	 * @param batchno
+	 */
+	public void insert(String batchNo);
+
+}

@@ -1,0 +1,29 @@
+package com.xuyurepos.common.util.quartz;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import com.xuyurepos.service.quartz.QuartzJobServer;
+import com.xuyurepos.vo.quartzJob.QuartzJobDto;
+
+public class QuartzJob{
+	@Autowired
+	 QuartzJobServer quartzJobServer;
+	
+    @SuppressWarnings("unused")
+	public void execute(){
+        // TODO Auto-generated method stub
+        System.out.println("this is my first scheduler!");
+		QuartzJobDto quartzJobDto=quartzJobServer.getQuartzJob("cardImport");
+        if(quartzJobDto!=null) {
+        	System.out.println(quartzJobDto.getBatchNo()+quartzJobDto.getAsyncFlag());
+        	quartzJobDto.setAsyncFlag("02");//待处理
+        	quartzJobServer.updateAsyncJobTask(quartzJobDto);
+        	System.out.println(quartzJobDto.getBatchNo()+quartzJobDto.getAsyncFlag());
+        	//业务处理 开始
+        	//doYourTask()
+        	//业务处理 结束
+        	quartzJobDto.setAsyncFlag("03");//处理完成
+        	quartzJobServer.updateAsyncJobTask(quartzJobDto);
+        }
+    }
+
+}

@@ -1,0 +1,14 @@
+package com.xuyurepos.service.manager;
+
+import com.xuyurepos.common.exception.CustomException;
+import com.xuyurepos.common.page.PageModel;
+import com.xuyurepos.vo.manager.XuyuMessageLogVo;
+
+public interface IccIdManagerService {
+
+	@SuppressWarnings("rawtypes")
+	public void findList(PageModel pageModel);
+
+	public void messageSend(XuyuMessageLogVo xuyuMessageLogVo) throws CustomException;
+
+}

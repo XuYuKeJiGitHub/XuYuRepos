@@ -1,0 +1,25 @@
+package com.xuyurepos.service.intergration.xuyu.common;
+
+public class XuYuKey {
+
+	/**
+	 * 中国移动闵行接口 MD5Key
+	 */
+	public  static final  String MD5_key="204F6F767DC3C423A909FBD3243999100F656EDD800F70667ED4D344AA05DCD3";
+	
+	/**
+	 * 中国电信DES key
+	 * 
+	 */
+	
+	public static final String Des_key="633c4846B";
+	
+	
+	
+	/**
+	 * 中国联通 加密 Base64Key
+	 * 
+	 */
+	
+	public static final String base64_key="8b1bb782-dfd2-424a-aa4a-739ccc408bc3";
+}

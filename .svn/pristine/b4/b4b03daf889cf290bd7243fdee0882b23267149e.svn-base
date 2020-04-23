@@ -1,0 +1,21 @@
+package com.xuyurepos.dao.quartz;
+
+import java.util.Map;
+
+import com.xuyurepos.vo.common.UploadFileDto;
+import com.xuyurepos.vo.quartzJob.QuartzJobDto;
+
+public interface QuartzJobDao {
+	
+	QuartzJobDto getQuartzJob(String asyncType);
+	
+	void updateAsyncJobTask(QuartzJobDto quartzJobDto);
+	
+	void saveAsyncJobTask(QuartzJobDto quartzJobDto);
+
+	void saveUploadFile(UploadFileDto uploadFileDto);
+
+	void runBatchGprs(Map map);
+
+	void runBatchPercent(Map map);
+}

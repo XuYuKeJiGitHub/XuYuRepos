@@ -1,0 +1,238 @@
+package com.xuyurepos.controller.facade;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.xuyurepos.common.log.LoggerFactory;
+import com.xuyurepos.common.util.MD5Util;
+import com.xuyurepos.service.facade.FacadeService;
+/**
+ * 外部接口
+ * @author yangfei
+ *
+ */
+@Controller
+@RequestMapping(value = "/facade")
+public class FacadeControl {
+	
+	Logger logger=LoggerFactory.getInstance().getLogger(FacadeControl.class);
+	
+	@Autowired
+	private FacadeService facadeService; 
+	
+	/**
+	 * 一、单卡GPRS用量信息查询
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/singleGprsInfoQuery", produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String singleGprsInfoQuery(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		JSONObject obj=new JSONObject();
+		try {
+			Map<String, Object> resultMap=new HashMap();
+			Map paramMap;
+			String requestParam=getRequestParam(request);
+			 paramMap=parseJson2Map(requestParam);
+			if(paramMap==null||paramMap.size()==0) {
+				obj.put("requestCode", "-1");
+				obj.put("requestMsg", "参数异常,未获取到请求参数");
+				writeResult(response,obj);
+				return null;
+			}else {
+				resultMap=invalid(paramMap);
+				if(resultMap!=null&&resultMap.size()>0) {
+					obj.put("requestCode", "0");
+					obj.put("requestMsg", "参数校验未通过");
+					obj.put("resultMap", resultMap);
+					writeResult(response,obj);
+					return null;
+				}
+			}
+			// 校验供应商代码暂时不做
+			resultMap=facadeService.singleGprsInfoQuery(paramMap);
+			if(resultMap!=null&&resultMap.size()>0) {
+				obj.put("requestCode", "0");
+				obj.put("requestMsg", "单卡用量信息查询成功");
+				resultMap.put("resultCode", "0");
+				resultMap.put("resultMsg", "单卡用量信息查询成功");
+				obj.put("resultMap", resultMap);
+				writeResult(response,obj);
+				return null;
+			}else {
+				obj.put("requestCode", "0");
+				obj.put("requestMsg", "单卡用量信息查询结果为空");
+				resultMap=new HashMap<>();
+				resultMap.put("resultCode", "-1");
+				resultMap.put("resultMsg", "单卡用量信息查询结果为空");
+				obj.put("resultMap", resultMap);
+				writeResult(response,obj);
+				return null;
+			}
+		} catch (Exception e) {
+			obj.put("requestCode", "-1");
+			obj.put("requestMsg", "接口异常,解析参数报错");
+			logger.info("接口异常"+e.getMessage());
+			writeResult(response,obj);
+			return null;
+		}
+		
+	}
+	
+	/**
+	 * 二、批量GPRS用量信息查询
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/batchGprsInfoQuery")
+	public String batchGprsInfoQuery(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		return "";
+	}
+	
+	/**
+	 * 将http字节流转换为String
+	 * @param request
+	 * @return
+	 */
+	public String getRequestParam(HttpServletRequest request) {
+ 		try {
+			StringBuilder sb=new StringBuilder("");
+			BufferedReader br=request.getReader();
+			String line=null;
+			while((line=br.readLine())!=null) {
+				sb.append(line);
+			}
+			return sb.toString();
+		} catch (IOException e) {
+ 			e.printStackTrace();
+ 			return null;
+		}
+	}
+	/**
+	 * 将JSON String转换为Map
+	 * @param requestParam
+	 * @return
+	 */
+	public Map parseJson2Map(String requestParam) {
+		JSONObject json=JSON.parseObject(requestParam);
+		Map paramMap =new HashMap();
+		for(String key:json.keySet()) {
+			paramMap.put(key, json.get(key));
+		}
+		return  paramMap;
+	}
+	/**
+	 * 将Map转换成Json返回
+	 * @param map
+	 * @return json string
+	 */
+	private String parseMap2Json(Map<String,Object> map) {
+		String str=JSON.toJSONString(map,SerializerFeature.WriteMapNullValue);
+		return str;
+	}
+	private void writeResult(HttpServletResponse response ,JSONObject obj) {
+		response.setContentType("application/json;charset=UTF-8");
+		try {
+			response.getWriter().write(obj.toString());
+			response.getWriter().flush();
+		} catch (Exception e) {
+			logger.info("接口异常，请联系系统管理员"+e.getMessage());
+		}
+	}
+	public Map invalid(Map paramMap) {
+		Map<String,Object> resultMap=new HashMap<String,Object>();
+		String agencyCode=(String) paramMap.get("agencyCode");
+		String accessNum=(String) paramMap.get("accessNum");
+		String provider=(String) paramMap.get("provider");
+		String arrea=(String) paramMap.get("arrea");
+		String queryDate=(String) paramMap.get("queryDate");
+		String sign=(String) paramMap.get("sign");
+		// 非空校验
+		if(agencyCode==null||"".equals(agencyCode)){
+			resultMap.put("resultCode", "-1");
+			resultMap.put("resultMsg", "参数异常;agencyCode为必填");
+			return resultMap;
+		}
+		if(accessNum==null||"".equals(accessNum)){
+			resultMap.put("resultCode", "-1");
+			resultMap.put("resultMsg", "参数异常;accessNum为必填");
+			return resultMap;
+		}
+		if(provider==null||"".equals(provider)){
+			resultMap.put("resultCode", "-1");
+			resultMap.put("resultMsg", "参数异常;provider为必填");
+ 			return resultMap;
+		
+		}
+		if(sign==null||"".equals(sign)){
+			resultMap.put("resultCode", "-1");
+			resultMap.put("resultMsg", "参数异常;sign为必填");
+ 			return resultMap;
+		}
+		TreeMap treeMap=new TreeMap();
+		String str="";
+		treeMap.put("agencyCode",agencyCode);
+		treeMap.put("accessNum",accessNum);
+		treeMap.put("provider",provider);
+		treeMap.put("arrea",arrea);
+		treeMap.put("queryDate",queryDate);
+		String signTemp=getSign(treeMap);
+		if(!sign.equals(signTemp)) {
+			resultMap.put("resultCode", "-1");
+			resultMap.put("resultMsg", "参数异常;签名错误");
+ 			return resultMap;
+		}
+		return resultMap;
+	}
+	/**
+	 * 
+	 * @param treeMap
+	 * @return
+	 */
+	public String getSign(TreeMap treeMap) {
+		String str="";
+		Iterator iter = treeMap.entrySet().iterator(); 
+		while(iter.hasNext()) {
+			Map.Entry entry = (Map.Entry)iter.next(); 
+		     if(entry.getValue()!=null&&!entry.getValue().equals("")) {
+		    	 str=str+entry.getKey()+"="+entry.getValue();
+		    	 str=str+"&";
+		     }
+		}
+		return getMD5(str);
+	}
+	/**
+	 * 获取MD5字符串
+	 * @param str
+	 * @return
+	 */
+	private String getMD5(String str) {
+		String key="xuYuRepos2019";
+		String signStr=str+"key="+key;//&key
+		String sign=DigestUtils.md5Hex(signStr).toUpperCase();
+		return sign;
+	}
+}

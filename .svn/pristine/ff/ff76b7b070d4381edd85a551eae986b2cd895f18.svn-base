@@ -1,0 +1,6 @@
+package com.xuyurepos.service.intergration.cmp.common;
+
+public class CMPKey {
+
+	public  static final  String MD5_key="";
+}

@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="wxpay1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/out/artifacts/XuYuRepos_war_exploded/wxpay/iOS_SDK_V3.3.3.zip!/" />
+      <root url="jar://$PROJECT_DIR$/out/artifacts/XuYuRepos_war_exploded/wxpay/Android_SDK_V3.3.3.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

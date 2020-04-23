@@ -1,0 +1,57 @@
+/**  
+ * Project Name:XuYuRepos  
+ * File Name:T.java  
+ * Package Name:com.xuyurepos.controller.payment  
+ * Date:2019年5月13日上午9:55:11  
+ * Copyright (c) 2019, chenzhou1025@126.com All Rights Reserved.  
+ *  
+*/  
+  
+package com.xuyurepos.controller.payment;
+
+import java.util.Map;
+
+import com.wxpay.WXPayConstants.SignType;
+import com.wxpay.WXPayUtil;
+
+/**  
+ * ClassName:T <br/>  
+ * Function: TODO ADD FUNCTION. <br/>  
+ * Reason:   TODO ADD REASON. <br/>  
+ * Date:     2019年5月13日 上午9:55:11 <br/>  
+ * @author   27569  
+ * @version    
+ * @since    JDK 1.6  
+ * @see        
+ */
+public class T {
+
+	
+	public static void main(String[] args) throws Exception {
+		String xml="<xml><appid><![CDATA[wx115e1f1585ba8a8f]]></appid>\r\n" + 
+				"<bank_type><![CDATA[CFT]]></bank_type>\r\n" + 
+				"<cash_fee><![CDATA[1]]></cash_fee>\r\n" + 
+				"<device_info><![CDATA[WEB]]></device_info>\r\n" + 
+				"<fee_type><![CDATA[CNY]]></fee_type>\r\n" + 
+				"<is_subscribe><![CDATA[N]]></is_subscribe>\r\n" + 
+				"<mch_id><![CDATA[1352368801]]></mch_id>\r\n" + 
+				"<nonce_str><![CDATA[giRfv67eJQPPRfUl7eQ29Hsl9x0a5p4y]]></nonce_str>\r\n" + 
+				"<openid><![CDATA[oVfSkjqkz4ndVKuUgm_Km4CozQ54]]></openid>\r\n" + 
+				"<out_trade_no><![CDATA[20190513095100037063]]></out_trade_no>\r\n" + 
+				"<result_code><![CDATA[SUCCESS]]></result_code>\r\n" + 
+				"<return_code><![CDATA[SUCCESS]]></return_code>\r\n" + 
+				"<sign><![CDATA[C23EB709781357BDEF7131C197D2D0A2BDAF7432CE6081824DF8AC1B382D20C8]]></sign>\r\n" + 
+				"<time_end><![CDATA[20190513095159]]></time_end>\r\n" + 
+				"<total_fee>1</total_fee>\r\n" + 
+				"<trade_type><![CDATA[JSAPI]]></trade_type>\r\n" + 
+				"<transaction_id><![CDATA[4200000322201905137615348424]]></transaction_id>\r\n" + 
+				"</xml>";
+		
+		Map map=WXPayUtil.xmlToMap(xml);
+		
+		boolean validResult = WXPayUtil.isSignatureValid(map, "5EF888F4DEA842E731DADAFA1A845589",SignType.HMACSHA256);
+       System.out.println(validResult);
+		
+	}
+}
+  

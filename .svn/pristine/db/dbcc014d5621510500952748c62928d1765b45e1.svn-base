@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper  
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuyurepos.dao.system.SystemMenuDao">
+	<resultMap type="com.xuyurepos.entity.system.SystemMenu" id="systemmenu">
+		<!-- column存数据库中的属性   property存javabean中数据-->
+		<id column="ID" property="id"/>
+		<result column="NAME" property="name"/>
+		<result column="CRT_DATE" property="crtDate"/>
+		<result column="ORDER" property="order"/>
+		<result column="ICON" property="icon"/>
+		<result column="LEAF_FLAG" property="leafFlag"/>
+		<result column="MOD_FUNC_ID" property="modFuncId"/>
+		<result column="PARENT_ID" property="parentId"/>
+	</resultMap>
+	
+	<resultMap type="com.xuyurepos.vo.system.SystemMenuVo" id="systemMenuVo">
+		<!-- column存数据库中的属性   property存javabean中数据-->
+		<id column="ID" property="id"/>
+		<result column="NAME" property="name"/>
+		<result column="ORDER" property="order"/>
+		<result column="ICON" property="icon"/>
+		<result column="LEAF_FLAG" property="leafFlag"/>
+		<result column="MOD_FUNC_ID" property="modFuncId"/>
+		<result column="PARENT_ID" property="parentId"/>
+		<result column="ACTION" property="action"/>
+	</resultMap>
+	
+    <select id="loadMenuTree"  useCache="false" resultMap="systemMenuVo">
+          SELECT * FROM SYSTEM_MENU t1 where t1.PARENT_ID='0' order by t1.`ORDER`
+    </select>        
+        
+    <select id="loadMenuChildrenTree"  useCache="false" parameterType="java.lang.String" resultMap="systemMenuVo">
+          SELECT B.*,C.ACTION FROM (select * from SYSTEM_MENU where  PARENT_ID=#{FID,jdbcType=VARCHAR}  ) B left join 
+          SYSTEM_FUNCTION C on B.MOD_FUNC_ID=C.ID
+    </select>
+    
+     <select id="loadUserMenuTree"  useCache="false" resultMap="systemMenuVo">
+           SELECT t1.*,t3.ACTION FROM (select * from SYSTEM_MENU where PARENT_ID='0') t1
+			 INNER JOIN SYSTEM_ROLE_MENU t2 on t1.ID=t2.MENU_ID
+			 and  exists(
+			 select * from SYSTEM_USER_ROLE a1 where a1.ROLE_ID=t2.ROLE_ID and a1.USER_ID=#{userId,jdbcType=VARCHAR}  
+			 ) 
+			 left JOIN SYSTEM_FUNCTION  t3 on t1.MOD_FUNC_ID=t3.ID
+			 order by t1.`ORDER`
+			 
+    </select>        
+        
+    <select id="loadUserMenuChildrenTree"  useCache="false" parameterType="java.lang.String" resultMap="systemMenuVo">
+          SELECT t1.*,t3.ACTION FROM (select * from SYSTEM_MENU where PARENT_ID=#{fID,jdbcType=VARCHAR}) t1
+			 INNER JOIN SYSTEM_ROLE_MENU t2 on t1.ID=t2.MENU_ID
+			 and  exists(
+			 select * from SYSTEM_USER_ROLE a1 where a1.ROLE_ID=t2.ROLE_ID and a1.USER_ID=#{userId,jdbcType=VARCHAR}  
+			 ) 
+			 left JOIN SYSTEM_FUNCTION  t3 on t1.MOD_FUNC_ID=t3.ID
+			 order by t1.`ORDER`
+			
+    </select>
+	
+	 <select id="find" parameterType="int" resultType="com.xuyurepos.entity.system.SystemMenu">
+          select * from SYSTEM_MENU t1 where t1.ID=#{id}
+    </select>
+    
+    <delete id="del" parameterType="int">
+          delete from SYSTEM_MENU 
+          where ID=#{id}
+     </delete>
+     
+     <insert id="insert" parameterType="com.xuyurepos.entity.system.SystemMenu">
+          insert into SYSTEM_MENU(`NAME`,CRT_DATE,`ORDER`,ICON,LEAF_FLAG,MOD_FUNC_ID,PARENT_ID)
+          values(
+          #{name,javaType=String}
+          ,#{crtDate,javaType=Date}
+          ,#{order,javaType=int}
+          ,#{icon,javaType=String}
+          ,#{leafFlag,javaType=String}
+          ,#{modFuncId,javaType=int}
+          ,#{parentId,javaType=int}
+          )          
+     </insert>
+     
+     <update id="update" parameterType="com.xuyurepos.entity.system.SystemMenu">
+          update SYSTEM_MENU set
+          `NAME`=#{name,javaType=String},
+          `ORDER`=#{order,javaType=int},
+          ICON=#{icon,javaType=String},
+          LEAF_FLAG=#{leafFlag,javaType=String},
+          MOD_FUNC_ID=#{modFuncId,javaType=int},
+          PARENT_ID=#{parentId,javaType=int}
+          where ID=#{id}
+          
+     </update>
+	
+    <sql id="sql_count">
+        SELECT COUNT(*)
+    </sql>
+    
+    <sql id="sql_select">
+        SELECT *
+    </sql>
+    
+    <sql id="sql_where">
+        FROM SYSTEM_MENU
+        <where>
+            <if test="queryObj != null">
+                <if test="queryObj.name != null and queryObj.name != ''">
+                    AND NAME like 
+                    '%${queryObj.name}%'
+                </if>
+                <if test="queryObj.parentId != null and queryObj.parentId != ''">
+                    AND PARENT_ID=#{queryObj.parentId}
+                </if>
+            </if>
+        </where>
+    </sql>
+    
+   <select id="selectUserListWithPage" parameterType="com.xuyurepos.common.page.PageModel" resultType="com.xuyurepos.entity.system.SystemMenu">
+        <include refid="sql_select"></include>
+        <include refid="sql_where"></include>
+        <if test="pageNumber != null and  pageSize!= null">
+            limit #{startRow},#{pageSize}
+        </if>
+    </select>
+
+    <select id="selectUserCountWithPage" parameterType="com.xuyurepos.common.page.PageModel" resultType="Integer">
+        <include refid="sql_count"></include>
+        <include refid="sql_where"></include>
+    </select>
+</mapper>

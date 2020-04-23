@@ -1,0 +1,58 @@
+package com.xuyurepos.service.impl.facade;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import com.xuyurepos.dao.comm.CommonMapper;
+import com.xuyurepos.service.facade.FacadeService;
+/**
+ * 外部查询接口实现类
+ * @author yangfei
+ *
+ */
+@Service
+public class FacadeServiceImpl implements FacadeService{
+	
+	@Autowired
+	private CommonMapper commonMapper;
+
+	@Override
+	public Map<String, Object> singleGprsInfoQuery() {
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+		String agencyCode=request.getParameter("agencyCode");
+		String accessNum=request.getParameter("accessNum");
+		String provider=request.getParameter("provider");
+		String arrea=request.getParameter("arrea");
+		String queryDate=request.getParameter("queryDate");
+		String sign=request.getParameter("sign");
+		
+		StringBuilder sb=new StringBuilder();
+		sb.append(" select ");
+		sb.append(" ACCESS_NUM  accessNum, ");
+		sb.append(" (select a1.F_VALUE from SYSTEM_LOOKUP_ITEM a1 where a1.F_LOOKUP_ID='OPERATOR'  and a1.F_CODE=t1.PROVIDER) as PROVIDER, ");
+		sb.append(" (SELECT a1.F_VALUE FROM SYSTEM_LOOKUP_ITEM a1 WHERE a1.F_LOOKUP_ID = 'OPERATOR_YD' AND a1.F_CODE = t1.OWNER_PLACE ) AS   arrea,");
+		sb.append(" (select a1.F_VALUE from SYSTEM_LOOKUP_ITEM a1 where a1.F_LOOKUP_ID='OWNER_COMBO_TYPE'  and a1.F_CODE=t1.COMBO_TYPE)  comboType,");
+		sb.append(" t1.COMNO_NAME  comboValue, ");
+		sb.append(" floor(REMAIN_GPS)  remainGprs,");
+		sb.append(" floor(USE_GPRS)    useGprs,");
+		sb.append(" DATE_FORMAT(t1.DEADLINE_DATE,'%Y-%m-%d') deadLineDate");
+		sb.append(" from XUYU_CONTENT_CARD_INFO t1 where t1.ACCESS_NUM='"+accessNum+"'  ");
+		Map<String, Object> map=commonMapper.findOneData(sb.toString());
+		if(map!=null){
+			map.put("resultCode", 0);
+		}else{
+			map=new HashMap<String, Object>();
+			map.put("resultCode", -1);
+			map.put("resultMsg", "查无数据,请确认参数");
+		}
+		return map;
+	}
+
+}

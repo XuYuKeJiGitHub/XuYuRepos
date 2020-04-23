@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuyurepos.dao.payment.PaymentDao">
+	<resultMap type="com.xuyurepos.entity.payment.PaymentOrder" id="paymentOrder">
+		<!-- column存数据库中的属性   property存javabean中数据-->
+		<id column="ID" property="id"/>
+		<result column="TRADE_NO" property="tradeNo"/>
+		<result column="OUT_TRADE_NO" property="outTradeNo"/>
+		<result column="TRADE_TYPE" property="tradeType"/>
+		
+		
+		<result column="CONTRACTOR_NO" property="contractorNo"/>
+		<result column="CARD_NO" property="cardNo"/>
+		<result column="ORDER_STATUS" property="orderStatus"/>
+
+	
+	   <result column="SELL_ID" property="sellId"/>		
+		   <result column="inserttime" property="inserttime"/>		
+		   <result column="updatetime" property="updatetime"/>	
+		   <result  column="isactive" property="isactive"/>	
+	</resultMap>
+	
+	 <select id="find" parameterType="int" resultType="com.xuyurepos.entity.payment.PaymentOrder">
+          select * from XUYU_PAYMENT t1 where t1.ID=#{id}
+    </select>
+    
+
+     
+     <insert id="createOrder" parameterType="com.xuyurepos.entity.payment.PaymentOrder">
+          insert into XUYU_PAYMENT(TRADE_NO,OUT_TRADE_NO,TRADE_TYPE,CONTRACTOR_NO,CARD_NO,ORDER_STATUS,SELL_ID)
+          values(
+          #{tradeNo,javaType=String}
+          ,#{outTradeNo,javaType=String}
+          ,#{tradeType,javaType=String}
+          ,#{contractorNo,javaType=String}
+          ,#{cardNo,javaType=String}
+          ,#{orderStatus,javaType=String}
+          ,#{sellId,javaType=String}
+
+          )          
+     </insert>
+     
+     <update id="updateOrderStatus" parameterType="com.xuyurepos.entity.payment.PaymentOrder">
+           UPDATE XUYU_PAYMENT
+ <trim prefix="set" suffixOverrides=",">
+  <if test="tradeNo !=null">trade_No=#{tradeNo},</if>
+  <if test="outTradeNo !=null">out_Trade_No=#{outTradeNo},</if>
+  <if test="tradeType !=null">trade_Type=#{tradeType},</if>
+  <if test="contractorNo !=null">contractor_No=#{contractorNo},</if>
+  <if test="cardNo !=null">card_No=#{cardNo},</if>
+  <if test="orderStatus !=null">order_Status=#{orderStatus},</if>
+  <if test="sellId !=null">sell_Id=#{sellId},</if>
+ </trim>
+ WHERE trade_No=#{tradeNo}   ;
+          
+          
+     </update>
+	
+    
+    <select id="findByOrderNo" parameterType="String" resultType="com.xuyurepos.entity.payment.PaymentOrder">
+        select * from XUYU_PAYMENT where trade_no=#{tradeNo,javaType=String} ;
+    </select>
+    
+</mapper>

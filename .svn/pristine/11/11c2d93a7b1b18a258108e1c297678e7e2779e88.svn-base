@@ -1,0 +1,9 @@
+jdbc.driverClassName=com.mysql.jdbc.Driver
+jdbc.url=jdbc:mysql://39.108.158.92:3306/xuyurepos?useUnicode=true&&characterEncoding=UTF-8
+jdbc.username=F4
+jdbc.password=XuyuRe
+jdbc.initialSize=0
+jdbc.maxActive=30
+jdbc.maxIdle=30
+jdbc.minIdle=2
+jdbc.maxWait=90000

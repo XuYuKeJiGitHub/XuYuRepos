@@ -1,0 +1,12 @@
+package com.xuyurepos.service.facade;
+
+import java.util.Map;
+
+public interface FacadeService {
+
+//	public Map<String, Object> singleGprsInfoQuery();
+
+	public Map<String, Object> singleGprsInfoQuery(Map paramMap);
+	
+
+}

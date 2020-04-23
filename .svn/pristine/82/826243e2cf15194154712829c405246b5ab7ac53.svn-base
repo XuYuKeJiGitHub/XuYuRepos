@@ -1,0 +1,67 @@
+package com.xuyurepos.service.impl.manager;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import com.xuyurepos.common.log.LoggerFactory;
+import com.xuyurepos.common.page.PageModel;
+import com.xuyurepos.dao.manager.XuyuContentCardInfoDao;
+import com.xuyurepos.dao.manager.XuyuContentCardMgrDao;
+import com.xuyurepos.entity.system.SystemUser;
+import com.xuyurepos.service.manager.IccIdManagerService;
+import com.xuyurepos.service.system.SystemOrgService;
+import com.xuyurepos.vo.manager.XuyuContentCardMgrSelfVo;
+import com.xuyurepos.vo.system.SystemOrgVo;
+@Transactional
+@Service
+public class IccIdManagerServiceImpl implements IccIdManagerService{
+	Logger logger=LoggerFactory.getInstance().getLogger(IccIdManagerServiceImpl.class);
+
+	@Resource
+	private XuyuContentCardMgrDao xuyuContentCardMgrDao;
+	@Resource
+	private XuyuContentCardInfoDao xuyuContentCardInfoDao;
+	
+	@Resource
+	private SystemOrgService systemOrgService;
+	
+	@SuppressWarnings("rawtypes")
+	@Override
+	public void findList(PageModel pageModel) {
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+		SystemUser systemUser=(SystemUser) request.getSession().getAttribute("systemUser");
+		String orgId=systemUser.getOrgId();
+		// 查找机构信息
+		SystemOrgVo systemOrgVo=systemOrgService.find(orgId);
+		if(systemOrgVo.getOrgLevel().equals("1")){
+			// 代理商用户开始划卡
+			logger.info("总部物联卡信息查询");
+			XuyuContentCardMgrSelfVo xuyuContentCardMgrSelfVo=(XuyuContentCardMgrSelfVo)pageModel.getQueryObj();
+			String agency=systemOrgVo.getOrgId();
+			logger.info("agency:"+agency);
+			xuyuContentCardMgrSelfVo.setAgency(agency);
+			pageModel.setRows(xuyuContentCardInfoDao.selectUserListWithPage(pageModel));
+		    pageModel.setTotal(xuyuContentCardInfoDao.selectUserCountWithPage(pageModel));
+		}else{
+			// 代理商用户开始划卡
+			logger.info("代理商物联卡信息查询");
+			XuyuContentCardMgrSelfVo xuyuContentCardMgrSelfVo=(XuyuContentCardMgrSelfVo)pageModel.getQueryObj();
+			String agency=systemOrgVo.getOrgId();
+			if(systemOrgVo.getOrgLevel().equals("2")){
+				agency=agency.substring(0,agency.length()-1);
+			}
+			logger.info("agency:"+agency);
+			xuyuContentCardMgrSelfVo.setAgency(agency);
+			pageModel.setRows(xuyuContentCardInfoDao.selectUserListWithPage(pageModel));
+		    pageModel.setTotal(xuyuContentCardInfoDao.selectUserCountWithPage(pageModel));
+		}
+		
+	}
+
+}

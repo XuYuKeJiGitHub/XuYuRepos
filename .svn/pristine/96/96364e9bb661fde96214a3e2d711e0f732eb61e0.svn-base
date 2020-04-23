@@ -1,0 +1,10 @@
+package com.xuyurepos.common.util.quartz;
+
+public class QuartzJob {
+     
+    public void execute(){
+        // TODO Auto-generated method stub
+        System.out.println("this is my first scheduler!");
+    }
+
+}

@@ -1,0 +1,15 @@
+package com.xuyurepos.service.autorule;
+
+import com.xuyurepos.common.page.PageModel;
+import com.xuyurepos.vo.autorule.AutoRuleManagerDTO;
+
+public interface AotoRuleManagerService {
+	/**
+	 * 保存自动化规则
+	 * @param autoRuleManagerDTO
+	 */
+	void saveRule(AutoRuleManagerDTO autoRuleManagerDTO);
+
+	void findList(PageModel pageModel);
+
+}

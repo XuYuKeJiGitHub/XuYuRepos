@@ -1,0 +1,67 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="../../base.jsp"%>
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>充值套餐</title>
+    <link type="text/css" rel="stylesheet" href="<%=request.getContextPath()%>/css/main.css">
+</head>
+<body>
+<div class="easyui-layout" data-options="fit:true" id="useBox">
+    <div data-options="region:'center',split:true">
+        <!--表格查询-->
+        <div class="tableFind" data-options="region:'north',border:false" style="height:95px;">
+             <p>
+	            <label>代理账号:</label><input style="width:8%;" type="text"/>
+	             <label>运营商:</label>
+	                                <select  name="opera" id="operaQuery"  style="width:335px" editable="false" class="easyui-combobox"></select>
+	            <label>有效期:</label>
+	                                <select  name="availableType" id="availableTypeQuery"  style="width:335px" editable="false" class="easyui-combobox"></select>               
+            </p>
+            
+            <p class="findButAlign">
+                <a id="btn" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-search'" onclick="obj.find()">查询</a>
+	            <a id="zhbtn" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-redo'" onclick="obj.find()">重置</a>
+            </p>
+        </div>
+        <!--表格列表-->
+        <div class="tableCon">
+            <table id="table" data-options="region:'center'" class="tableStyle"></table>
+            <div id="tabelBut">
+                <div>
+                    <a href="#" class="easyui-linkbutton" plain="true"  data-options="iconCls:'icon-add'" onclick="obj.addBox()">新增套餐</a>
+                    <a href="#" class="easyui-linkbutton" plain="true"  data-options="iconCls:'icon-edit'" onclick="obj.edit()">编辑套餐</a>
+                    <a href="#" class="easyui-linkbutton" plain="true"  data-options="iconCls:'icon-remove'" >上架/下架</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--//新增弹出框-->
+<div id="addBox" >
+    <form id="addForm" method="post">
+    
+        <div class="formDiv"><label>流量(MB):</label><input type="text" style="width:335px" class="easyui-numberbox"  data-options="min:0" name="gprs" id="gprs"/></div>
+        <div class="formDiv"><label>排序:</label><input type="text" style="width:335px" class="easyui-numberbox"  data-options="min:0" name="order" id="order"/></div>
+        <div class="formDiv"><label>售价:</label><input type="text" style="width:335px" class="easyui-numberbox"  data-options="min:0,precision:2" name="selfPrice" id="selfPrice"/></div>
+        <div class="formDiv"><label>原价:</label><input type="text" style="width:335px" class="easyui-numberbox"  data-options="min:0,precision:2" name="actualPrice" id="actualPrice"/></div>
+        <div class="formDiv"><label>套餐描述:</label><input style="width:80%;height:160px;" class="easyui-textbox" name="desc" id="desc" data-options="multiline:true"></input></div>
+        <div class="formDiv"><label>运营商:</label><select  name="opera" id="opera"  style="width:335px" editable="false" class="easyui-combobox"></select></div>
+        <div class="formDiv"><label>有效期:</label><select  name="availableType" id="availableType"  style="width:335px" editable="false" class="easyui-combobox"></select></div>
+        <div class="formDiv"><label>代理提成:</label><input type="text" style="width:335px" class="easyui-numberbox"  data-options="min:0,precision:2" name="commission" id="commission"/></div>
+        <input type="text" hidden="true" id="id"  name="id" data-options="required:true">
+        <div class="forSubmint">
+            <a href="#" class="easyui-linkbutton"  iconCls="icon-ok"  onclick="obj.sum()">保存</a>
+            <a href="#" class="easyui-linkbutton"  iconCls="icon-ok"  onclick="obj.can()">取消</a>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+var bathPath="<%=basePath%>";
+</script>
+<script src=payPackages.js></script>
+
+
+</body>
+</html>

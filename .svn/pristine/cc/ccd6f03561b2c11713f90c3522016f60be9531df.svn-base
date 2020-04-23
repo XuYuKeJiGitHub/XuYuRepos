@@ -1,0 +1,54 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="../../base.jsp"%>
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>卡出库</title>
+    <link type="text/css" rel="stylesheet" href="<%=request.getContextPath()%>/css/main.css">
+</head>
+<body>
+<div class="easyui-layout" data-options="fit:true" id="useBox">
+    <div data-options="region:'center',split:true">
+        <!--表格查询-->
+        <div class="tableFind">
+            <p>
+	             <label>卡号;</label><input type="text"/>
+	             <label>卡段;</label><input type="text"/><input type="text"/>
+	             <label>开户日期;</label><input class="easyui-datebox" data-options="sharedCalendar:'#cc'" style="width:8%;"><input style="width:8%;" class="easyui-datebox" data-options="sharedCalendar:'#cc'">
+	             <a id="btn" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-search'" onclick="obj.find()">查询</a>
+	            <a id="zhbtn" href="javascript:" class="easyui-linkbutton tableFindBut" data-options="iconCls:'icon-redo'" onclick="obj.find()">重置</a>
+            </p>
+        </div>
+        <div id="cc" class="easyui-calendar"></div>
+        <!--表格列表-->
+        <div class="tableCon">
+            <table id="table" class="tableStyle"></table>
+            <div id="tabelBut">
+                <div>
+                    <a href="#" class="easyui-linkbutton" plain="true"  onclick="obj.addBox()">批量出库</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--//新增弹出框-->
+<div id="addBox" >
+    <form id="addForm" method="post">
+        <div class="formDiv"><label>卡号:</label><input style="width:80%;height:160px;" class="easyui-textbox" name="message" data-options="multiline:true"></input></div>
+        <div class="formDiv"><label>卡用户:</label><input type="text"/>
+        <div class="formDiv"><label>出库价格:</label><input type="text"/>
+        <div class="forSubmint">
+            <a href="#" class="easyui-linkbutton"  iconCls="icon-ok"  onclick="obj.sum()">确定</a>
+            <a href="#" class="easyui-linkbutton"  iconCls="icon-ok"  onclick="obj.sum()">取消</a>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+var bathPath="<%=basePath%>";
+</script>
+<script src=cardSelf.js></script>
+
+
+</body>
+</html>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="deploy 39.108.158.92" name="fuzhuangBuild">
+	<property file="iccormsBuild.properties" />
+	<property name="warpath" value="E:\war" />
+	<property name="webroot" value="WebContent" />
+	<property name="warfile" value="E:\warfile" />
+	<!-- begin deploy total -->
+	<target name="deploy total">
+		<antcall target="deploy 10.112.13.77" />
+	</target>
+	<!-- end deploy total -->
+
+	<!-- begin deploy 39.108.158.92 -->
+	<target name="deploy 39.108.158.92">
+		<property name="APIP" value="39.108.158.92" />
+		<property name="ADinit" value="true" />
+		<antcall target="makewar" />
+	</target>
+	<!-- end deploy 39.108.158.92 -->
+
+	<!-- begin make the war -->
+	<target name="makewar" depends="init">
+		<echo>=======  makewar  =========</echo>
+		<mkdir dir="${warpath}/${APIP}" />
+		<war warfile="${warpath}/${APIP}/XuYuRepos.war">
+			<lib dir="${warfile}/lib" />
+			<classes dir="${warfile}/classes" />
+			<fileset dir="${warfile}/webroot">
+				<exclude name="**/*." />
+			</fileset>
+		</war>
+	</target>
+	<!-- end make the war -->
+	
+	<target name="init">
+		<echo>=======  begin deploy the AP:${APIP}  =========</echo>
+
+		<condition property="disableADinit.true">
+			<equals arg1="${ADinit}" arg2="true"/>
+		</condition>
+		<condition property="disableADinit.false">
+			<equals arg1="${ADinit}" arg2="false"/>
+		</condition>
+		
+		<echo>1.rebuild the folder</echo>
+		<delete dir="${warfile}" failonerror="false" />
+		<mkdir dir="${warfile}" />
+		<mkdir dir="${warfile}/classes" />
+		<mkdir dir="${warfile}/lib" />
+		<mkdir dir="${warfile}/webroot" />
+		<echo>2.copy the src classes</echo>
+		<copy includeemptydirs="false" todir="${warfile}/classes">
+			<fileset dir="build/classes">
+				<exclude name="**/*." />
+			</fileset>
+		</copy>
+
+		<echo>5.copy the webroot</echo>
+		<copy includeemptydirs="true" todir="${warfile}/webroot">
+			<fileset dir="${webroot}">
+				<exclude name="**/*." />
+			</fileset>
+		</copy>
+		
+	</target>
+</project>

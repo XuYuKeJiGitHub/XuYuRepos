@@ -1,0 +1,14 @@
+package com.xuyurepos.dao.batch;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+ 
+
+public interface CardStateChangeDao {
+	
+	public List  queryData(int limit);
+	
+	public void updateDataState(@Param("id") String id, @Param("status") String status);
+	
+}

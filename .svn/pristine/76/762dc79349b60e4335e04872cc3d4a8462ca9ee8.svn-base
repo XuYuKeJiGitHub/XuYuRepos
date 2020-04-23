@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper  
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuyurepos.dao.system.SystemAnnexeDao">
+	<resultMap type="com.xuyurepos.entity.system.SystemAnnexe" id="systemAnnexe">
+		<!-- column存数据库中的属性   property存javabean中数据-->
+		<id column="ANNEXE_ID" jdbcType="VARCHAR" property="annexeId" />
+	    <result column="ANNEXE_NAME" jdbcType="VARCHAR" property="annexeName" />
+	    <result column="CREATE_TIME" jdbcType="DATE" property="createTime" />
+	    <result column="ANNEXE_TYPE" jdbcType="VARCHAR" property="annexeType" />
+	    <result column="ANNEXE_SIZE" jdbcType="DOUBLE" property="annexeSize" />
+	    <result column="RELATION_INFO" jdbcType="VARCHAR" property="relationInfo" />
+	    <result column="RELATION_MOD" jdbcType="VARCHAR" property="relationMod" />
+	    <result column="UPLOAD_USER" jdbcType="VARCHAR" property="uploadUser" />
+	    <result column="UPLOAD_USER_NAME" jdbcType="VARCHAR" property="uploadUserName" />
+	    <result column="UPLOAD_PATH" jdbcType="VARCHAR" property="uploadPath" />
+	    <result column="UPLOAD_BATCHNO" jdbcType="VARCHAR" property="uploadBatchno" />
+	    <result column="COMBO_TYPE" jdbcType="VARCHAR" property="comboType" />
+	    <result column="WAIT_TYPE" jdbcType="VARCHAR" property="waitType" />
+	    <result column="TEST_TYPE" jdbcType="VARCHAR" property="testType" />
+	    <result column="CARD_TYPE" jdbcType="VARCHAR" property="cardType" />
+	    <result column="STANDARD" jdbcType="VARCHAR" property="standard" />
+	    <result column="UNITCOST" jdbcType="VARCHAR" property="unitCost" />
+	</resultMap>
+	
+	 <select id="getList" parameterType="com.xuyurepos.entity.system.SystemAnnexe" resultMap="systemAnnexe">
+        SELECT * FROM SYSTEM_ANNEXE where 1=1
+        <if test="uploadBatchno != null and uploadBatchno != ''">
+                    AND UPLOAD_BATCHNO=#{uploadBatchno}
+        </if>
+    </select>
+    
+    <select id="find" parameterType="int" resultType="com.xuyurepos.entity.system.SystemAnnexe">
+          select * from SYSTEM_ANNEXE t1 where t1.ID=#{id}
+    </select>
+    
+    <delete id="del" parameterType="int">
+          delete from SYSTEM_ANNEXE 
+          where ID=#{id}
+     </delete>
+    
+    <insert id="insert" parameterType="com.xuyurepos.entity.system.SystemAnnexe">
+	    insert into SYSTEM_ANNEXE (ANNEXE_ID, ANNEXE_NAME, CREATE_TIME, 
+	      ANNEXE_TYPE, ANNEXE_SIZE, RELATION_INFO, 
+	      RELATION_MOD, UPLOAD_USER, UPLOAD_USER_NAME, 
+	      UPLOAD_PATH, UPLOAD_BATCHNO)
+	    values (#{annexeId,jdbcType=VARCHAR}, #{annexeName,jdbcType=VARCHAR}, #{createTime,jdbcType=DATE}, 
+	      #{annexeType,jdbcType=VARCHAR}, #{annexeSize,jdbcType=DOUBLE}, #{relationInfo,jdbcType=VARCHAR}, 
+	      #{relationMod,jdbcType=VARCHAR}, #{uploadUser,jdbcType=VARCHAR}, #{uploadUserName,jdbcType=VARCHAR}, 
+	      #{uploadPath,jdbcType=VARCHAR}, #{uploadBatchno,jdbcType=VARCHAR})
+    </insert>
+    
+    <update id="update" parameterType="com.xuyurepos.entity.system.SystemAnnexe">
+	    update SYSTEM_ANNEXE
+	    set ANNEXE_NAME = #{annexeName,jdbcType=VARCHAR},
+	      CREATE_TIME = #{createTime,jdbcType=DATE},
+	      ANNEXE_TYPE = #{annexeType,jdbcType=VARCHAR},
+	      ANNEXE_SIZE = #{annexeSize,jdbcType=DOUBLE},
+	      RELATION_INFO = #{relationInfo,jdbcType=VARCHAR},
+	      RELATION_MOD = #{relationMod,jdbcType=VARCHAR},
+	      UPLOAD_USER = #{uploadUser,jdbcType=VARCHAR},
+	      UPLOAD_USER_NAME = #{uploadUserName,jdbcType=VARCHAR},
+	      UPLOAD_PATH = #{uploadPath,jdbcType=VARCHAR},
+	      UPLOAD_BATCHNO = #{uploadBatchno,jdbcType=VARCHAR}
+	    where ANNEXE_ID = #{annexeId,jdbcType=VARCHAR}
+  </update>
+  
+</mapper>

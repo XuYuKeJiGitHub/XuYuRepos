@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper  
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuyurepos.dao.batch.CardStateChangeDao">
+	<cache></cache>
+	<resultMap type="com.xuyurepos.entity.manager.XuyuContentCardInfo" id="xuyuContentCardInfo">
+		<!-- column存数据库中的属性   property存javabean中数据-->
+		<id column="id" property="id"/>
+		<result column="ACCESS_NUM" property="accessNum"/>
+		<result column="ICCID" property="iccid"/>
+		<result column="IMSI" property="imsi"/>
+		<result column="PROVIDER" property="provider"/>
+		<result column="OWNER_PLACE" property="ownerPlace"/>
+		<result column="WORKING_CONDITION" property="workingCondition"/>
+
+	</resultMap>
+	
+	 <select id="queryData" parameterType="Integer" resultMap="xuyuContentCardInfo">
+	 
+
+	select id,access_num ,iccid,imsi,provider,owner_place from XUYU_CONTENT_CARD_INFO where  DATE_FORMAT( update_date,'%Y%m') <![CDATA[<]]>      DATE_FORMAT(NOW(),'%Y%m') and provider=#{provider}  order by id  LIMIT #{fromIndex},#{endIndex} ; 
+    </select>
+    
+    
+   <select id="queryCardStateResultData" parameterType="Integer" resultMap="xuyuContentCardInfo">
+	select id,access_num ,iccid,imsi,provider,owner_place,WORKING_CONDITION from XUYU_CONTENT_CARD_RULE_RESULT where   IS_DEAL='N'   and provider=#{provider}  order by id  LIMIT #{fromIndex},#{endIndex} ; 
+    </select>
+    
+     <update id="updateDataState"  >
+	 
+	 update XUYU_CONTENT_CARD_INFO set WORKING_CONDITION=#{status} where id=#{id}
+
+    </update>
+    
+        
+
+    
+         <update id="updateDataStateByNum"  >
+	 
+	 update XUYU_CONTENT_CARD_INFO set WORKING_CONDITION=#{status} where access_num=#{accessNum}
+
+    </update>
+    
+    
+         <update id="updateDataStateResult"  >
+	 
+	 update XUYU_CONTENT_CARD_RULE_RESULT set IS_DEAL='Y' where id=#{id}
+
+    </update>
+    
+     <update id="updateDataGPRS"  >
+	 
+	 update XUYU_CONTENT_CARD_INFO set USE_GPRS=#{gprs} where id=#{id}
+
+    </update>
+    
+</mapper>

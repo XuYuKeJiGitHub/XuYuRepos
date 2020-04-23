@@ -1,0 +1,182 @@
+package com.xuyurepos.service.impl.manager;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.xuyurepos.common.log.LoggerFactory;
+import com.xuyurepos.dao.manager.ImportTempDao;
+import com.xuyurepos.dao.manager.XuyuContentCardInfoImportDao;
+import com.xuyurepos.dao.manager.XuyuContentCardMgrDao;
+import com.xuyurepos.entity.system.SystemAnnexe;
+import com.xuyurepos.service.manager.ImportTempService;
+import com.xuyurepos.service.system.SystemAnnexeService;
+/**
+ * 临时表处理
+ * @author yangfei
+ *
+ */
+@Transactional
+@Service
+public class ImportTempServiceImpl implements ImportTempService{
+	Logger logger=LoggerFactory.getInstance().getLogger(ImportTempServiceImpl.class);
+
+	@Resource
+	private ImportTempExcelParse importTempExcelParse;
+	@Resource
+	private ImportTempExcelMoreParse importTempExcelMoreParse;
+	@Resource
+	private SystemAnnexeService systemAnnexeService;
+	@Resource
+	private ImportTempDao importTempDao;
+	@Resource
+	private XuyuContentCardMgrDao xuyuContentCardMgrDao;
+	@Resource
+	private XuyuContentCardInfoImportDao xuyuContentCardInfoImportDao;
+	
+	/**
+	 * 解析数据入库
+	 */
+	@Override
+	public void anaLysisData(String batchNo) {
+		if(batchNo==null||"".equals(batchNo)){
+			logger.error("解析异常：没有正确传入参数");
+		}else{
+			SystemAnnexe annexe=new SystemAnnexe();
+			annexe.setUploadBatchno(batchNo);
+			List<SystemAnnexe> list=systemAnnexeService.getList(annexe);
+			if(list.size()>0){
+				for (int i = 0; i < list.size(); i++) {
+					annexe=list.get(i);
+					logger.info("解析数据目录");
+					importTempExcelParse.anaLysisData(annexe.getUploadPath());
+					// 解析完成后操作
+					// 第一步确认数据是移动联通还是电信
+					// 移动1联通2电信3
+					if("1".equals(annexe.getRelationInfo())){
+						// 第一步删除无效数据
+						importTempDao.delYd();
+						// 第二部分数据校验
+						int j=importTempDao.getCountYd();
+						if(j==0){
+							// 目标表没数据，直接插入表数据
+							xuyuContentCardMgrDao.insertYd("1",annexe.getRelationMod(),batchNo);
+						}else{
+							// 插入日志表
+							System.out.println("没有插入的数据");
+						}
+					}else if("2".equals(annexe.getRelationInfo())){
+						// 联通导入
+						// 第一步删除无效数据
+						importTempDao.delLt();
+						// 第二部分数据校验
+						int j=importTempDao.getCountLt();
+						if(j==0){
+							// 目标表没数据，直接插入表数据
+							xuyuContentCardMgrDao.insertLt("2",batchNo);
+						}else{
+							// 插入日志表
+							System.out.println("没有插入的数据");
+						}
+					}else if("3".equals(annexe.getRelationInfo())){
+						// 电信导入
+						// 第一步删除无效数据
+						importTempDao.delDx();
+						// 第二部分数据校验
+						int j=importTempDao.getCountDx();
+						if(j==0){
+							// 目标表没数据，直接插入表数据
+							xuyuContentCardMgrDao.insertDx("3",batchNo);
+						}else{
+							// 插入日志表
+							System.out.println("没有插入的数据");
+						}
+					}
+				}
+			}
+			
+		}
+		
+	}
+    
+	/**
+	 * 解析数据入库
+	 */
+	@Override
+	public void anaLysisUpdateData(String batchNo) {
+		if(batchNo==null||"".equals(batchNo)){
+			logger.error("解析异常：没有正确传入参数");
+		}else{
+			SystemAnnexe annexe=new SystemAnnexe();
+			annexe.setUploadBatchno(batchNo);
+			List<SystemAnnexe> list=systemAnnexeService.getList(annexe);
+			if(list.size()>0){
+				for (int i = 0; i < list.size(); i++) {
+					annexe=list.get(i);
+					logger.info("解析数据目录");
+					importTempExcelMoreParse.anaLysisData(annexe.getUploadPath());
+					// 解析完成后操作
+					// 第一步确认数据是移动联通还是电信
+					// 移动1联通2电信3
+					if("1".equals(annexe.getRelationInfo())){
+						// 第一步删除无效数据
+						importTempDao.delYd();
+						// 值类型转换
+						xuyuContentCardInfoImportDao.updateYd();
+						// 第二步校验数据是否已经更新过
+						int j=xuyuContentCardInfoImportDao.getCountYd();
+						if(j==0){
+							// 还没操作的直接插入
+							xuyuContentCardInfoImportDao.insertMobilInfo(batchNo);
+						}else{
+							// 数据已经插入的，针对已经存在的做更新操作，
+							// 不存在的做插入操作
+							xuyuContentCardInfoImportDao.updateExistsMobilInfo(batchNo);
+							xuyuContentCardInfoImportDao.insertNotExistsMobilInfo(batchNo);
+						}
+						
+						
+					}else if("2".equals(annexe.getRelationInfo())){
+						// 第一步删除无效数据
+						importTempDao.delLt();
+						// 值类型转换
+						xuyuContentCardInfoImportDao.updateLt();
+						// 第二步校验数据是否已经更新过
+						int j=xuyuContentCardInfoImportDao.getCountLt();
+						if(j==0){
+							// 还没操作的直接插入
+							xuyuContentCardInfoImportDao.insertUnicomInfo(batchNo);
+						}else{
+							// 数据已经插入的，针对已经存在的做更新操作，
+							// 不存在的做插入操作
+							xuyuContentCardInfoImportDao.updateExistsUnicomInfo(batchNo);
+							xuyuContentCardInfoImportDao.insertNotExistsUnicomInfo(batchNo);
+						}
+					}else if("3".equals(annexe.getRelationInfo())){
+						// 第一步删除无效数据
+						importTempDao.delDx();
+						// 值类型转换
+						xuyuContentCardInfoImportDao.updateDx();
+						// 第二步校验数据是否已经更新过
+						int j=xuyuContentCardInfoImportDao.getCountDx();
+						if(j==0){
+							// 还没操作的直接插入
+							xuyuContentCardInfoImportDao.insertTelecomInfo(batchNo);
+						}else{
+							// 数据已经插入的，针对已经存在的做更新操作，
+							// 不存在的做插入操作
+							xuyuContentCardInfoImportDao.updateExistsTelecomInfo(batchNo);
+							xuyuContentCardInfoImportDao.insertNotExistsTelecomInfo(batchNo);
+						}
+					}
+				}
+			}
+			
+		}
+	}
+
+}

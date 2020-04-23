@@ -1,0 +1,24 @@
+﻿package com.alipay.config;
+
+public class AlipayConfig {
+	// 商户appid
+	public static String APPID = "2015121000954163";
+	// 私钥 pkcs8格式的
+	public static String RSA_PRIVATE_KEY = "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAMT0ck+YxlsAZEwuk8r1DmiFuIBxj3NY7kToEnU0XWBAJSfq3UXZXCOpSb42mm0I/8O5WIK33H+BfJKzAnBfoeCdHBLuNUyRk+dnqxUyKk2u3iarcuyF9dSuNpNv2evlQZXZVfRu5Xj6WO8h3BTP/cWzPJGCopWJ/KyBPRVvkkIZAgMBAAECgYADaTRdmoi85LnX8+qNVkckmkRCvTS9y6l8ugQv0XNYimPaWB/y6LvGxlTHnYx5HPHJAvm8cdC4yJZOuBjvt0hHYsfslMBaHZCix876kP114/SBaJxMi8qV9RndHiBSOmbSjB0TLcFcOJsnFwFqvifNfHDxByBtSW4WnBzJmzHfjQJBAOtFXIbLvnNXqlAWg4I6RY9OqHlD8RiE7HfIX1mFmeaQzALCh4+zPUWP+RJ/K9wOQSKdIy3SPYHRiMNqOFq+6kcCQQDWTtlv/5OMz6u8vNusxhszi5OY4AELv3STZc8K8+4jcaVQO57BwMlcDy0PBed4b7Yhji7vqiHumL+NPZzNq0CfAkEApmfu4+CkGkz9R5xE9A1nOc921h66Ho+V+bsdxeH7UttDkQgqffdW9Sa6Et0kFod2hpcCVNyJaJLd2un8ZiL27QJBAIybqVAxeKa/rqcjpmICjOBR6KI5/pWtpRf8iU5fY1SAAP3WUEBBdBvhnSepMQi1CuOTPTpj/uVj9PH/hbzvanMCQHj30/kjJ6uYGizhyfN2l3FY+9VWZA4aUs5n60+edTmM1zPTERqkGc001b26JBnCBU9L4yg97d9YUr7+vXtrJn0=" ;
+	// 服务器异步通知页面路径 需http://或者https://格式的完整路径，不能加?id=123这类自定义参数，必须外网可以正常访问
+	public static String notify_url = "https://iots.shingsou.com/wappay/notify_url.jsp";
+	// 页面跳转同步通知页面路径 需http://或者https://格式的完整路径，不能加?id=123这类自定义参数，必须外网可以正常访问 商户可以自定义同步跳转地址
+	public static String return_url = "https://iots.shingsou.com/wappay/return_url.jsp";
+	// 请求网关地址
+	public static String URL = "https://openapi.alipay.com/gateway.do";
+	// 编码
+	public static String CHARSET = "UTF-8";
+	// 返回格式
+	public static String FORMAT = "json";
+	// 支付宝公钥
+	public static String ALIPAY_PUBLIC_KEY = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDDI6d306Q8fIfCOaTXyiUeJHkrIvYISRcc73s3vF1ZT7XN8RNPwJxo8pWaJMmvyTn9N4HQ632qJBVHf8sxHi/fEsraprwCtzvzQETrNRwVxLO5jVmRGi60j8Ue1efIlzPXV9je9mkjzOmdssymZkh2QhUrCmZYI/FCEa3/cNMW0QIDAQAB";
+	// 日志记录目录
+	public static String log_path = "/log";
+	// RSA2
+	public static String SIGNTYPE = "RSA";
+}

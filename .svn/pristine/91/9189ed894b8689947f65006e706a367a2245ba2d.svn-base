@@ -1,0 +1,225 @@
+package com.xuyurepos.controller.payment;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSONObject;
+import com.alipay.util.UniqueOrderGenerate;
+import com.wxpay.MyConfig;
+import com.wxpay.WXPay;
+import com.wxpay.WXPayUtil;
+import com.xuyurepos.common.log.LoggerFactory;
+import com.xuyurepos.entity.payment.PaymentOrder;
+import com.xuyurepos.service.payment.PaymentService;
+/**
+ * 三方支付参数获取类
+ * @author yangfei
+ *
+ */
+@Controller
+@RequestMapping(value="wxpay")
+public class WxPayControl {
+	Logger logger=LoggerFactory.getInstance().getLogger(WxPayControl.class);
+	
+	private static final String wxNotifyUrl="http://iots.shingsou.com/wxpay/notify";
+	
+	@Autowired
+	private PaymentService paymentService;
+	
+	/**
+	 * 获取微信支付参数
+	 * @param systemLookUpVo
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/pay", produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String wxPay( HttpServletRequest request) throws Exception {
+		try {
+			logger.info("wxPay PayControl start");
+			MyConfig config = new MyConfig();
+	        WXPay wxpay = new WXPay(config);
+	        UniqueOrderGenerate uog=new UniqueOrderGenerate(0,0);
+	        String out_trade_no=request.getParameter("out_trade_no");
+	        BigDecimal bd=new BigDecimal(request.getParameter("totalFee"));
+	      
+	        String total_fee=  bd.multiply(new BigDecimal(100)).toPlainString();
+	        String spbill_create_ip=getInternetIp();
+	        String trade_type=request.getParameter("tradeType");
+	        String product_id=uog.nextId()+"";
+	        String openid=request.getParameter("openid");
+	        System.out.println("测试：");
+	        
+//	        Map<String, String> data = new HashMap<String, String>();
+//	        
+//	        data.put("body", "旭宇物联网卡充值");
+//	        data.put("out_trade_no", "2016090910595900000014");
+//	        data.put("device_info", "WEB");
+//	        data.put("fee_type", "CNY");
+//	        data.put("total_fee", "1");
+//	        data.put("spbill_create_ip", "123.12.12.123");
+//	        data.put("notify_url", "http://iots.shingsou.com/paycontrol/notify");
+//	        data.put("trade_type", "NATIVE");  // 此处指定为扫码支付
+//	        data.put("product_id", "12");
+	        
+	        
+	        
+	        Map<String, String>postDate = new HashMap<String, String>();
+	        
+	        postDate.put("body", "旭宇物联网卡充值");
+	        postDate.put("out_trade_no",out_trade_no );
+	        postDate.put("device_info", "WEB");
+	        postDate.put("fee_type", "CNY");
+	        postDate.put("total_fee", total_fee);
+	        postDate.put("spbill_create_ip",spbill_create_ip);
+	        postDate.put("notify_url", wxNotifyUrl);
+	        if(trade_type.equals("NATIVE")) {
+	        	postDate.put("product_id", product_id);
+	        }else if(trade_type.equals("JSAPI ")) {
+	        	postDate.put("openid",openid);
+	        }
+	        postDate.put("trade_type", trade_type); 
+	        
+	        PaymentOrder order= new PaymentOrder();
+	        order.setTradeNo(out_trade_no);
+	        order.setTotalAmount(new BigDecimal(total_fee));
+	        order.setTradeType("WX");
+	        paymentService.createOrder(order);
+	        
+	        Map<String, String> resp = wxpay.unifiedOrder(postDate);
+	        logger.info(""+resp);
+	        
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("appId",  resp.get("appid"));
+			map.put("timeStamp", WXPayUtil.getCurrentTimestamp());
+			map.put("nonceStr",resp.get("nonce_str"));
+			map.put("vpackage", resp.get("prepay_id"));
+			map.put("signType", resp.get("sign_type"));
+			map.put("paySign", resp.get("sign"));
+			String result = JSONObject.toJSONString(map);
+			logger.info("jsapiPay PayControl end");
+			return result;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	
+	@RequestMapping(value = "/notify")
+	@ResponseBody
+	public void notify(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		logger.info("wxpay notify  start");
+		BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream()));
+		try {
+			String str = null;
+			while ((str = br.readLine()) != null) {
+				str += str;
+			}
+
+			logger.info("WxPay回调参数：" + str);
+
+			MyConfig config = new MyConfig();
+
+			boolean validResult = WXPayUtil.isSignatureValid(str.trim(), config.getKey());
+
+			if (validResult) {
+				logger.info("微信支付回调验签成功！");
+				Map map = WXPayUtil.xmlToMap(str);
+				String return_code = map.get("return_code") + "";
+				if (return_code.equals("SUCCESS")) {
+					String out_trade_no = map.get("out_trade_no") + "";
+					PaymentOrder order = new PaymentOrder();
+					order.setTradeNo(out_trade_no);
+					order.setOrderStatus("S");
+					paymentService.updateOrderStatus(order);
+
+					Map respMap = new HashMap();
+					respMap.put("return_code", "SUCCESS");
+					respMap.put("return_msg", "OK");
+
+					String respXML = WXPayUtil.mapToXml(respMap);
+					response.setContentType("text/xml;charset=UTF-8"); 
+					response.getWriter().print(respXML);
+				    response.getWriter().flush(); 
+				    response.getWriter().close();
+				}
+
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (null != br) {
+				br.close();
+			}
+		}
+	}
+	
+	 public static String INTRANET_IP = getIntranetIp(); // 内网IP
+	    public static String INTERNET_IP = getInternetIp(); // 外网IP
+
+
+	    /**
+	     * 获得内网IP
+	     * @return 内网IP
+	     */
+	    private static String getIntranetIp(){
+	        try{
+	            return InetAddress.getLocalHost().getHostAddress();
+	        } catch(Exception e){
+	            throw new RuntimeException(e);
+	        }
+	    }
+	
+	 /**
+     * 获得外网IP
+     * @return 外网IP
+     */
+    private static String getInternetIp(){
+        try{
+            Enumeration<NetworkInterface> networks = NetworkInterface.getNetworkInterfaces();
+            InetAddress ip = null;
+            Enumeration<InetAddress> addrs;
+            while (networks.hasMoreElements())
+            {
+                addrs = networks.nextElement().getInetAddresses();
+                while (addrs.hasMoreElements())
+                {
+                    ip = addrs.nextElement();
+                    if (ip != null
+                            && ip instanceof Inet4Address
+                            && ip.isSiteLocalAddress()
+                            && !ip.getHostAddress().equals(INTRANET_IP))
+                    {
+                        return ip.getHostAddress();
+                    }
+                }
+            }
+
+            // 如果没有外网IP，就返回内网IP
+            return INTRANET_IP;
+        } catch(Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+}

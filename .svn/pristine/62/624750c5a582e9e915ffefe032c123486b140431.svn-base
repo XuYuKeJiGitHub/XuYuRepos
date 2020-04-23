@@ -1,0 +1,273 @@
+package com.xuyurepos.controller.cardmanager;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.xuyurepos.common.constants.SystemConstants;
+import com.xuyurepos.common.exception.BizException;
+import com.xuyurepos.common.log.LoggerFactory;
+import com.xuyurepos.common.upload.FileTypeConstance;
+import com.xuyurepos.common.util.ProsUtil;
+import com.xuyurepos.common.util.StringUtil;
+import com.xuyurepos.controller.system.SystemUserControl;
+import com.xuyurepos.entity.system.SystemUser;
+import com.xuyurepos.service.logger.LoggerInfoService;
+import com.xuyurepos.service.quartz.QuartzJobServer;
+import com.xuyurepos.vo.common.UploadFileDto;
+import com.xuyurepos.vo.logger.LoggerInfoDto;
+import com.xuyurepos.vo.quartzJob.QuartzJobDto;
+
+@Controller
+@RequestMapping(value = "/csvoprate")
+public class CsvOprateUtil {
+
+	private static final String UPLOAD_FAILE="{sucess:false,mess:'文件上传失败'}";
+	private static final String UPLOAD_SUCESS="{sucess:true,mess:'文件上传成功'}";
+	
+	Logger logger=LoggerFactory.getInstance().getLogger(SystemUserControl.class);
+	
+    @Autowired
+	QuartzJobServer quartzJobServer;
+    @Autowired
+    LoggerInfoService loggerInfoService;
+	@Resource
+	private BizException bizException; 
+	
+	Logger log=LoggerFactory.getInstance().getLogger(CsvOprateUtil.class);
+	
+	// 下载模板
+	@RequestMapping(value = "/export", produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public void export(HttpServletRequest request,HttpServletResponse response) throws Exception {
+		try {
+			
+			String filename=request.getParameter("filename");
+			String exportType=request.getParameter("exportType");
+			response.setHeader("content-disposition", "attachment;filename="+filename+".csv");
+			StringBuffer sb=new StringBuffer();
+			OutputStream outs = response.getOutputStream();
+			outs.write(generateExportHead(sb,exportType));
+			outs.flush();
+			outs.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	/**
+	 * 根据下载类型拼接模板头文件
+	 * 
+	 */
+	public byte[]  generateExportHead(StringBuffer sb,String exportType) {
+		 byte[] buff = null;
+		try {
+			if(exportType.equals("cardModelExport")) {
+				String[] csvHead= {"卡号","接入号","长号","短号"};
+				String headName="物联卡导入信息";
+				int length=csvHead.length;
+				sb.append("").append(",").append("")
+					.append(",").append(headName)
+					.append(",").append("\n");
+				for(int i=0;i<length;i++) {
+					sb.append(csvHead[i]).append(",");
+				}
+				 	buff=sb.toString().getBytes("gbk");
+			}else {
+				String[] csvHead= {"群号","群组","卡号","接入号","长号","短号"};
+				String headName="物联卡导入信息";
+				int length=csvHead.length;
+				sb.append("").append(",").append("")
+					.append(",").append(headName)
+					.append(",").append("\n");
+				for(int i=0;i<length;i++) {
+					sb.append(csvHead[i]).append(",");
+				}
+				 	buff=sb.toString().getBytes("gbk");
+			}
+		} catch (UnsupportedEncodingException e) {
+			
+			e.printStackTrace();
+		}
+		return buff;
+	}
+	
+
+	/**
+	 * 文件上传
+	 * @throws IOException 
+	 */
+	@RequestMapping(value = "/upload", produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public void upload(HttpServletRequest request,HttpServletResponse response,String operator,String ownerPlace,String asyncType) throws IOException {
+       StringBuffer fileName=new StringBuffer();
+       String isImport=request.getParameter("isImport");
+       String uploadPath=request.getParameter("uploadPath");
+       logger.info("operator:"+operator+";ownerPlace:"+ownerPlace+";asyncType:"+asyncType);
+       
+       UploadFileDto uploadFileDto=null;
+       QuartzJobDto quartzJobDto=null;
+       response.setCharacterEncoding(SystemConstants.CHARSET_UTF_8);
+       PrintWriter out=response.getWriter();
+       if(!ServletFileUpload.isMultipartContent(request)){
+    	   out.println(UPLOAD_FAILE);
+       }
+       String name=null;
+       FileItem fileItem=null;
+       try {
+		    StringBuilder builder=new StringBuilder();
+		    if(StringUtil.isNotBlank(uploadPath)){
+		    	builder.append(uploadPath);
+		    }else if(null==isImport){
+		    	builder.append(ProsUtil.getProperty("uploadPath"));
+		    }else{
+		    	builder.append(ProsUtil.getProperty("importPath"));
+		    }
+		    if(!builder.toString().equals(File.separator)){
+		    	builder.append(File.separator);
+		    	fileName.append("import_");
+		    }
+		    
+		    // 查看目录是否存在
+		    String saveFilePath=builder.toString();
+		    if(!new File(saveFilePath).exists()){
+		    	new File(saveFilePath).mkdir();
+		    }
+		    
+		    SystemUser systemUser=(SystemUser) request.getSession().getAttribute("systemUser");
+		    DiskFileItemFactory factory=new DiskFileItemFactory();
+		    ServletFileUpload upload=new ServletFileUpload(factory);
+		    upload.setHeaderEncoding(SystemConstants.CHARSET_UTF_8);
+		    upload.setSizeMax(Long.parseLong(ProsUtil.getProperty("maxUploadFileSize")));
+		    
+		    List<FileItem> items=upload.parseRequest(request);
+		    String nameDate=new SimpleDateFormat("yyyy_MM_dd_HH_mm_sss").format(new Date());
+		    String uploadName=null;
+		    String uploadBatchNo=null;
+		    for (Iterator<FileItem> i= items.iterator(); i.hasNext();) {
+				 fileItem = (FileItem) i.next();
+				 if(fileItem.isFormField()){
+					 name=fileItem.getFieldName();
+					 out.println(UPLOAD_FAILE);
+				 }else{
+					 name=fileItem.getName();
+					 String simpleFileName = name.substring(name.lastIndexOf("\\")+1, name.length());
+					 if(saveFilePath==null||"".equals(saveFilePath)){
+						 out.println(UPLOAD_FAILE);
+					 }else{
+						 uploadName=systemUser.getUserName()+"_"+nameDate+FileTypeConstance.getExtFileName(fileItem.getName());
+						 fileName.append(uploadName);
+						 fileItem.write(new File(saveFilePath+fileName));
+						 uploadBatchNo=loggerInfoService.getSequence("jobTaskSeq");
+						 uploadFileDto=new UploadFileDto();
+						 quartzJobDto =new QuartzJobDto();
+						 uploadFileDto.setAnnexeId(uploadBatchNo);
+						 uploadFileDto.setAnnexeSize(Double.valueOf(fileItem.getSize()));
+						 uploadFileDto.setAnnexeType(name.substring(name.indexOf(".")));
+						 uploadFileDto.setAnnexeName(simpleFileName);
+						 uploadFileDto.setRelationMod(ownerPlace);
+						 uploadFileDto.setUploadPath(saveFilePath+fileName);
+						 uploadFileDto.setUploadUser(systemUser.getUserName());
+						 uploadFileDto.setUploadUserName(systemUser.getCname());
+						 uploadFileDto.setUploadBatchNo(uploadBatchNo);
+						 uploadFileDto.setRelationInfo(operator);
+						 quartzJobServer.saveUploadFile(uploadFileDto);
+						 
+						 quartzJobDto.setId(uploadBatchNo);
+						 quartzJobDto.setAsyncBatchNo(uploadBatchNo);
+						 if("cardImport".equals(asyncType)){
+							 quartzJobDto.setAsyncType("cardImport");
+							 quartzJobDto.setAsyncName("导卡");
+						 }else{
+							 quartzJobDto.setAsyncType("cardUpdate");
+							 quartzJobDto.setAsyncName("数据更新");
+						 }
+						
+						 quartzJobDto.setAsyncFlag("01");
+						 quartzJobServer.saveAsyncJobTask(quartzJobDto);
+						 
+						 LoggerInfoDto loggerInfo=new LoggerInfoDto();
+							loggerInfo.setId(loggerInfoService.getSequence("seq"));
+							if("cardImport".equals(asyncType)){
+								loggerInfo.setModelId("cardImport");
+								loggerInfo.setModelName("导卡");
+								loggerInfo.setOpreate("import");
+							}else{
+								loggerInfo.setModelId("cardUpdate");
+								loggerInfo.setModelName("数据更新");
+								loggerInfo.setOpreate("update");
+							}
+							
+							loggerInfo.setMark(uploadBatchNo);
+							loggerInfo.setCreateUser(systemUser.getUserName());
+							loggerInfoService.saveLogger(loggerInfo);
+						 // 数据库操作
+						 if(null==isImport){
+							 
+						 }
+						 out.print(UPLOAD_SUCESS);
+//						 out.print("{success:true,realFileName:'"+fileName+"',fileFullName:'" + saveFilePath + File.separator + fileName + "'}");
+					 }
+				 }
+			}
+		    out.flush();
+		    out.close();
+	   } catch (Exception e) {
+		   out.println(UPLOAD_FAILE);
+		   out.close();
+	   }
+	}
+	
+/**
+     * 导入
+     * 
+     * @param file csv文件(路径+文件)
+     * @return
+     */
+    public static List<String> importCsv(File file){
+        List<String> dataList=new ArrayList<String>();
+        
+        BufferedReader br=null;
+        try { 
+            br = new BufferedReader(new FileReader(file));
+            String line = ""; 
+            while ((line = br.readLine()) != null) { 
+                dataList.add(line);
+            }
+        }catch (Exception e) {
+        }finally{
+            if(br!=null){
+                try {
+                    br.close();
+                    br=null;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+ 
+        return dataList;
+    }
+
+}

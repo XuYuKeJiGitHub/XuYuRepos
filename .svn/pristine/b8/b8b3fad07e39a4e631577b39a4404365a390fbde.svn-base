@@ -1,0 +1,10 @@
+package com.xuyurepos.service.payment;
+
+import com.xuyurepos.entity.payment.XuyuRecharge;
+import com.xuyurepos.vo.payment.XuyuRechargeVo;
+
+public interface XuyuRechargeService {
+
+	public XuyuRecharge saveInfo(XuyuRechargeVo xuyuRechargeVo);
+
+}

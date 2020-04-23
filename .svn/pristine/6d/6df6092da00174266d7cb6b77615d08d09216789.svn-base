@@ -1,0 +1,68 @@
+package com.xuyurepos.service.impl.payment;
+
+import javax.annotation.Resource;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+
+import com.xuyurepos.common.constants.SystemConstants;
+import com.xuyurepos.common.log.LoggerFactory;
+import com.xuyurepos.dao.payment.XuyuRechargeDao;
+import com.xuyurepos.entity.payment.XuyuRecharge;
+import com.xuyurepos.service.payment.XuyuRechargeService;
+import com.xuyurepos.vo.payment.XuyuRechargeVo;
+/**
+ * 充值处理实现类
+ * @author yangfei
+ *
+ */
+@Service
+public class XuyuRechargeServiceImpl implements XuyuRechargeService{
+	Logger log=LoggerFactory.getInstance().getLogger(XuyuRechargeServiceImpl.class);
+	
+	@Resource
+	private  XuyuRechargeDao xuyuRechargeDao;
+    
+	/**
+	 * 保存方法
+	 */
+	@Override
+	public XuyuRecharge saveInfo(XuyuRechargeVo xuyuRechargeVo) {
+		log.info("SystemOrgVo:"+xuyuRechargeVo.toString());
+		XuyuRecharge xuyuRecharge=new XuyuRecharge();
+		if(xuyuRechargeVo!=null&&SystemConstants.STRINGEMPTY.equals(xuyuRechargeVo.getId())){
+			xuyuRecharge=add(xuyuRechargeVo);
+		}else{
+			xuyuRecharge=edit(xuyuRechargeVo);
+		}
+		return xuyuRecharge;
+	}
+    
+	/**
+	 * 修改数据
+	 * @param xuyuRechargeVo
+	 * @return
+	 */
+	private XuyuRecharge edit(XuyuRechargeVo xuyuRechargeVo) {
+		XuyuRecharge xuyuRecharge=xuyuRechargeDao.find(Integer.valueOf(xuyuRechargeVo.getId()));
+		if(xuyuRecharge!=null){
+			BeanUtils.copyProperties(xuyuRechargeVo, xuyuRecharge);
+			xuyuRechargeDao.update(xuyuRecharge);
+		}
+		return xuyuRecharge;
+	}
+    
+	/**
+	 * 添加数据
+	 * @param xuyuRechargeVo
+	 * @return
+	 */
+	private XuyuRecharge add(XuyuRechargeVo xuyuRechargeVo) {
+		XuyuRecharge xuyuRecharge=new XuyuRecharge();
+		BeanUtils.copyProperties(xuyuRechargeVo, xuyuRecharge);
+		xuyuRechargeDao.insert(xuyuRecharge);
+		return xuyuRecharge;
+	}
+
+}

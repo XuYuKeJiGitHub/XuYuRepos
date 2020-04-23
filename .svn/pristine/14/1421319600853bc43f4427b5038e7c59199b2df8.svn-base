@@ -1,0 +1,94 @@
+/**
+ * Project Name:XuYuRepos
+ * File Name:SynInfoFacadeService.java
+ * Package Name:com.xuyurepos.service.intergration.xuyu.facade
+ * Date:2019年3月29日下午4:21:31
+ * Copyright (c) 2019, chenzhou1025@126.com All Rights Reserved.
+ *
+*/
+
+package com.xuyurepos.service.intergration.xuyu.facade;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.xuyurepos.common.util.JsonUtil;
+import com.xuyurepos.service.intergration.xuyu.cmp.MobileCMPRequest;
+
+/**
+ * ClassName:SynInfoFacadeService <br/>
+ * Function: TODO ADD FUNCTION. <br/>
+ * Reason:	 TODO ADD REASON. <br/>
+ * Date:     2019年3月29日 下午4:21:31 <br/>
+ * @author   zhangliang
+ * @version  
+ * @since    JDK 1.8
+ * @see 	 
+ */
+public class SynInfoFacadeService {
+
+	static Logger logger=LoggerFactory.getLogger(SynInfoFacadeService.class);
+	
+	/**
+	 * 
+	 * downTimeByMobile:(移动物联网卡停复机). <br/>
+	 * TODO(这里描述这个方法适用条件 – 可选).<br/>
+	 * TODO(这里描述这个方法的执行流程 – 可选).<br/>
+	 * TODO(这里描述这个方法的使用方法 – 可选).<br/>
+	 * TODO(这里描述这个方法的注意事项 – 可选).<br/>
+	 *
+	 * @author zhangliang
+	 * @param msisdn
+	 * @param operType  0-暂停 1-恢复
+
+	 * @return
+	 * @since JDK 1.8
+	 */
+	
+	public boolean  changeCardState(String msisdn,String operType) {
+		Map map=new HashMap();
+		map.put("oper_type",operType);
+	String result=	MobileCMPRequest.nativeMobileCMPRequest(msisdn, "changeCardState",map);
+	logger.info(result);
+	
+	String code=JsonUtil.parseJson2Map(result).get("code")+"";
+	if(code.equals("00000")) {
+		return true;
+	}else {
+		return false;
+	}
+	}
+	
+	/**
+	 * 
+	 * cardStatusService:(卡状态信息查询). <br/>
+	 * TODO(这里描述这个方法适用条件 – 可选).<br/>
+	 * TODO(这里描述这个方法的执行流程 – 可选).<br/>
+	 * TODO(这里描述这个方法的使用方法 – 可选).<br/>
+	 * TODO(这里描述这个方法的注意事项 – 可选).<br/>
+	 *  卡状态：0 未激活 1 正常 2 停机 3 测试期 4 沉默期 5 其他
+	 * @author zhangliang
+	 * @param msisdn
+	 * @since JDK 1.8
+	 */
+	public String  cardStatusService(String msisdn) {
+
+		Map map=new HashMap();
+	String result=	MobileCMPRequest.nativeMobileCMPRequest(msisdn, "changeCardState",map);
+	logger.info(result);
+	Map resultMap=JsonUtil.parseJson2Map(result);
+	
+	String code=resultMap.get("code")+"";
+	if(code.equals("00000")) {
+		Map body=JsonUtil.parseJson2Map(resultMap.get("body")+"");
+		String status=body.get("status")+"";
+		return status;
+	}
+	return "";
+	}
+	
+}
+
