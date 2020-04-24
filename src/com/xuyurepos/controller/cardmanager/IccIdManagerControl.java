@@ -286,7 +286,6 @@ public class IccIdManagerControl {
 					    iccIdManagerService.changeCardState(accessNumStr[i],bool);
 					    xuyuMessageLogVoStatue=new XuyuMessageLogVo();
 					    xuyuMessageLogVoStatue.setAccessNums(accessNumStr[i]);
-					    //修改后查询
 					    iccIdManagerService.userStatusQuery(xuyuMessageLogVoStatue);
 					}
 				}
