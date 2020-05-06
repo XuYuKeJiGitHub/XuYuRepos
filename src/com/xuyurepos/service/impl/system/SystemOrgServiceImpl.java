@@ -1,5 +1,6 @@
 package com.xuyurepos.service.impl.system;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -13,6 +14,7 @@ import com.xuyurepos.common.log.LoggerFactory;
 import com.xuyurepos.common.page.PageModel;
 import com.xuyurepos.common.util.StringUtil;
 import com.xuyurepos.dao.system.SystemOrgDao;
+import com.xuyurepos.entity.manager.GPRSDosageInfo;
 import com.xuyurepos.entity.system.SystemOrg;
 import com.xuyurepos.service.system.SystemOrgService;
 import com.xuyurepos.vo.system.SystemOrgVo;

@@ -70,6 +70,33 @@
 	    <result column="ORG_NAME" jdbcType="VARCHAR" property="orgName" />
 	</resultMap>
 	
+	<select id="findGPRSInfo" resultType="com.xuyurepos.entity.manager.GPRSDosageInfo">
+        
+		SELECT
+		ACCESS_NUM as accessNum,
+		ICCID as iccid,
+		<!-- case when t1.PROVIDER='1' then
+		       (select a2.F_VALUE from SYSTEM_LOOKUP_ITEM a2 where a2.F_LOOKUP_ID='MOBILE_CARD_STATU'  and a2.F_CODE=t1.WORKING_CONDITION)
+		       when t1.PROVIDER='2' then
+		       (select a2.F_VALUE from SYSTEM_LOOKUP_ITEM a2 where a2.F_LOOKUP_ID='UNICOM_CARD_STATU'  and a2.F_CODE=t1.WORKING_CONDITION)
+		       when t1.PROVIDER='3' then
+		       (select a2.F_VALUE from SYSTEM_LOOKUP_ITEM a2 where a2.F_LOOKUP_ID='TELECOM_CARD_STATU'  and a2.F_CODE=t1.WORKING_CONDITION)
+		      end workingCondition,
+		          (select a2.F_VALUE from SYSTEM_LOOKUP_ITEM a2 where a2.F_LOOKUP_ID='OWNER_COMBO_TYPE'  and a2.F_CODE=t1.COMBO_TYPE)  comboType,
+		          t1.COMNO_NAME  comboValue, -->
+		          WORKING_CONDITION as workingCondition,
+		          COMBO_TYPE as comboType,
+		          COMNO_NAME as comboValue,
+		          IFNULL(floor(REMAIN_GPS),0) as flowRemain,
+		          IFNULL(floor(USE_GPRS),0)  as flowUsed,
+				  IFNULL(floor(TOTAL_GPRS),0) as flowTotal,
+		          <!-- (select a2.F_VALUE from SYSTEM_LOOKUP_ITEM a2 where a2.F_LOOKUP_ID='OPERATOR'  and a2.F_CODE=t1.PROVIDER) as provider, -->
+				  PROVIDER as provider,
+				  t1.DEADLINE_DATE as expireDate
+		   FROM XUYU_CONTENT_CARD_INFO t1  inner  join SYSTEM_AUTH_ORG a1 on a1.ID = t1.AGENCY
+		and  a1.ORG_ID LIKE '1000009089001%'
+    </select>
+	
 	<select id="getSequence" parameterType="String" resultType="String">
           select _nextval(#{seqName}) from dual
     </select>

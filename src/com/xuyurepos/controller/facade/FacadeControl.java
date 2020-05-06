@@ -2,6 +2,7 @@ package com.xuyurepos.controller.facade;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -25,8 +26,13 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.xuyurepos.common.constants.SystemConstants;
 import com.xuyurepos.common.exception.CustomException;
 import com.xuyurepos.common.log.LoggerFactory;
+import com.xuyurepos.common.util.XmlMapUtils;
+import com.xuyurepos.common.util.quartz.QuartzJob;
+import com.xuyurepos.entity.manager.GPRSDosageInfo;
+import com.xuyurepos.entity.manager.XuyuContentCardInfo;
 import com.xuyurepos.service.facade.FacadeService;
 import com.xuyurepos.service.manager.IccIdManagerService;
+import com.xuyurepos.util.HttpClientUtil;
 import com.xuyurepos.vo.manager.XuyuMessageLogVo;
 /**
  * 外部接口
@@ -45,8 +51,198 @@ public class FacadeControl {
 	@Autowired
 	private IccIdManagerService iccIdManagerService; 
 	
+	private static final String ReportedCardInfoUrl="https://admin.ibdnchina.com/api/iotcard/update";
+	
+	private String getMD52(String str) {
+		String key="ibdn20";
+		String signStr=str+"key="+key;//&key
+		String sign=DigestUtils.md5Hex(signStr).toUpperCase();
+		return sign;
+	}
+	@RequestMapping(value = "/ReportedCardGPRSInfo", produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public void ReportedCardGPRSInfo() throws Exception {
+		logger.info("批量上报GPRS用量信息");
+		ArrayList<GPRSDosageInfo> cardInfoList = iccIdManagerService.findGPRSInfo();
+		String dateStr = Long.toString(System.currentTimeMillis()/1000L);
+		
+		StringBuffer sbf = new StringBuffer();
+		sbf.append("agencyCode=xuyu");
+		sbf.append("&timestamp="+dateStr+"&");
+		
+		String sign = getMD52(sbf.toString());
+		
+		HashMap<String, Object> reqMap = new HashMap<>();
+		reqMap.put("agencyCode", "xuyu");
+		reqMap.put("timestamp", dateStr);
+		reqMap.put("sign", sign);
+		reqMap.put("list", cardInfoList);
+		
+		String url = ReportedCardInfoUrl;
+		String doPost = HttpClientUtil.doPost(url, reqMap);
+		JSONObject parseObject = JSONObject.parseObject(doPost);
+		String status = (String) parseObject.get("errorCode");
+		logger.info("批量上报GPRS用量信息状态码"+status);
+	}
+	
 	/**
-	 * 五、用户批量停复机
+	 * 七、用户卡状态查询+刷新数据库  内部转发
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 * @return 
+	 */
+	@RequestMapping(value = "/userStatusQuery", produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String userStatusQuery(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
+		JSONObject obj=new JSONObject();
+		try {
+			Map<String, Object> resultMap=new HashMap();
+			Map paramMap;
+			String requestParam=getRequestParam(request);
+			paramMap=parseJson2Map(requestParam);
+			if(paramMap==null||paramMap.size()==0) {
+				obj.put("requestCode", "-1");
+				obj.put("requestMsg", "参数异常,未获取到请求参数");
+				writeResult(response,obj);
+				return null;
+			}else {
+				resultMap=invalid3(paramMap);
+				if(resultMap!=null&&resultMap.size()>0) {
+					obj.put("requestCode", "0");
+					obj.put("requestMsg", "参数校验未通过");
+					writeResult(response,obj);
+					return null;
+				}
+			}
+			String accessNum = (String) paramMap.get("accessNum");//停复机状态 ：00复机 ；02停机
+			
+			
+			XuyuMessageLogVo xuyuMessageLogVo = new XuyuMessageLogVo();
+			xuyuMessageLogVo.setAccessNums(accessNum);
+			String status = iccIdManagerService.userStatusQuery(xuyuMessageLogVo);
+			
+			logger.info("对外提供数据库卡状态："+status);
+			obj.put("requestCode", "0");
+			obj.put("requestMsg", "状态查询成功");
+			obj.put("status", status);
+			writeResult(response,obj);
+			return null;
+		}catch (Exception e) {
+			
+			return null;
+		}
+	}
+	
+	/**
+	 * 六、用户批量停复机  外部提供
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 * @return 
+	 */
+	private static final String huaianPLTFJ="http://47.102.220.16:8080/XuYuRepos/facade/changeCardStateAll";
+	private static final String yanchengPLTFJ="http://47.101.207.177:8080/XuYuRepos/facade/changeCardStateAll";
+	
+	@RequestMapping(value = "/changeCardStateAllCard", produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String changeCardStateAllCard(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
+		JSONObject obj=new JSONObject();
+		try {
+			Map<String, Object> resultMap=new HashMap();
+			Map paramMap;
+			String requestParam=getRequestParam(request);
+			paramMap=parseJson2Map(requestParam);
+			if(paramMap==null||paramMap.size()==0) {
+				obj.put("requestCode", "-1");
+				obj.put("requestMsg", "参数异常,未获取到请求参数");
+				writeResult(response,obj);
+				return null;
+			}else {
+				resultMap=invalid2(paramMap);
+				if(resultMap!=null&&resultMap.size()>0) {
+					obj.put("requestCode", "0");
+					obj.put("requestMsg", "参数校验未通过");
+					writeResult(response,obj);
+					return null;
+				}
+			}
+			String[] accessNumStr = paramMap.get("accessNums").toString().split(";");
+			String bool = paramMap.get("bool").toString();//停复机状态 ：00复机 ；02停机
+			
+			String changeCardState = SystemConstants.STATE_CG;;
+			for (int i = 0; i < accessNumStr.length; i++) {
+				//查询卡所属城市
+				XuyuContentCardInfo xuyuContentCardInfo = iccIdManagerService.findCardOwnerPlace(accessNumStr[i]);
+				String ownerPlace = xuyuContentCardInfo.getOwnerPlace();
+				String provider = xuyuContentCardInfo.getProvider();
+				StringBuffer sbf = new StringBuffer();
+				sbf.append("agencyCode=xuyu");
+				sbf.append("&accessNums="+accessNumStr[i]);
+				sbf.append("&bool="+bool+"&");
+				String sign = getMD5(sbf.toString());
+				
+				if ("1".equals(provider) && "1".equals(ownerPlace)) {//淮安
+					String url = huaianPLTFJ;
+					HashMap<String, Object> params = new HashMap<>();
+					params.put("agencyCode", "xuyu");
+					params.put("accessNums", accessNumStr[i]);
+					params.put("bool", bool);
+					params.put("sign", sign);
+					String post = HttpClientUtil.doPost(url, params);
+					JSONObject parseObject = JSONObject.parseObject(post);
+					changeCardState = (String) parseObject.get("requestCode"); 
+				}else if("1".equals(provider) && "2".equals(ownerPlace)){//盐城
+					String url = yanchengPLTFJ;
+					HashMap<String, Object> params = new HashMap<>();
+					params.put("agencyCode", "xuyu");
+					params.put("accessNums", accessNumStr[i]);
+					params.put("bool", bool);
+					params.put("sign", sign);
+					String post = HttpClientUtil.doPost(url, params);
+					JSONObject parseObject = JSONObject.parseObject(post);
+					changeCardState = (String) parseObject.get("requestCode");
+				}else{
+					/*if(SystemConstants.STATE_FJ.equals(bool)){
+						bool = "false";
+					}else{
+						bool = "true";
+					}
+					changeCardState = iccIdManagerService.changeCardState(accessNumStr[i],bool);*/
+					changeCardState = SystemConstants.STATE_ZBZC;
+				}
+			}
+			
+			if(SystemConstants.STATE_CG.equals(changeCardState)){
+				obj.put("requestCode", "0");
+				obj.put("requestMsg", "停复机操作成功");
+			}else if(SystemConstants.STATE_SB.equals(changeCardState)){
+				obj.put("requestCode", "1");
+				obj.put("requestMsg", "停复机操作失败");
+			}else if(SystemConstants.STATE_PF.equals(changeCardState)){
+				obj.put("requestCode", "-1");
+				obj.put("requestMsg", "十分钟内做用户状态修改业务次数不得大于三次");
+			}else if(SystemConstants.STATE_YEBZ.equals(changeCardState)){
+				obj.put("requestCode", "3");
+				obj.put("requestMsg", "余额不足 不能复机");
+			}else if(SystemConstants.STATE_ZBZC.equals(changeCardState)){
+				obj.put("requestCode", "-2");
+				obj.put("requestMsg", "此卡号暂不支持停复机操作，详情请联系管理员");
+			}else{
+				obj.put("requestCode", "2");
+				obj.put("requestMsg", "系统或请求异常");
+			}
+			writeResult(response,obj);
+			return null;
+		}catch (Exception e) {
+			
+			return null;
+		}
+	}
+	/**
+	 * 五、用户批量停复机  内部转发使用
 	 * @param request
 	 * @param response
 	 * @throws Exception
@@ -55,6 +251,7 @@ public class FacadeControl {
 	@RequestMapping(value = "/changeCardStateAll", produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public String changeCardStateAll(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
 		JSONObject obj=new JSONObject();
 		try {
 			Map<String, Object> resultMap=new HashMap();
@@ -76,12 +273,34 @@ public class FacadeControl {
 				}
 			}
 			String[] accessNumArr = paramMap.get("accessNums").toString().split(";");
-			String state = paramMap.get("state").toString();//停复机状态 ：00正常 ；02停机
-			for (int i = 0; i < accessNumArr.length; i++) {
-			    iccIdManagerService.changeCardState(accessNumArr[i],state);
+			String bool = paramMap.get("bool").toString();//停复机状态 ：00复机 ；02停机
+			if(SystemConstants.STATE_FJ.equals(bool)){
+				bool = "false";
+			}else{
+				bool = "true";
 			}
-			obj.put("requestCode", "0");
-			obj.put("requestMsg", "停复机操作成功");
+			String status = SystemConstants.STRING_YES;
+			for (int i = 0; i < accessNumArr.length; i++) {
+				status = iccIdManagerService.changeCardState(accessNumArr[i],bool);
+			}
+			logger.info("跳出服务成功！参数："+bool);
+			logger.info("提供停复机状态："+status);
+			if(SystemConstants.STATE_CG.equals(status)){
+				obj.put("requestCode", "0");
+				obj.put("requestMsg", "停复机操作成功");
+			}else if(SystemConstants.STATE_SB.equals(status)){
+				obj.put("requestCode", "1");
+				obj.put("requestMsg", "停复机操作失败");
+			}else if(SystemConstants.STATE_PF.equals(status)){
+				obj.put("requestCode", "-1");
+				obj.put("requestMsg", "十分钟内做用户状态修改业务次数不得大于三次");
+			}else if(SystemConstants.STATE_YEBZ.equals(status)){
+				obj.put("requestCode", "3");
+				obj.put("requestMsg", "余额不足不能复机");
+			}else{
+				obj.put("requestCode", "2");
+				obj.put("requestMsg", "系统或请求异常");
+			}
 			writeResult(response,obj);
 			return null;
 		}catch (Exception e) {
@@ -498,7 +717,7 @@ public class FacadeControl {
 	 */
 	@RequestMapping(value = "/pay")
 	public String pay(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		JSONObject obj=new JSONObject();
+		JSONObject obj=new JSONObject();//返回体
 		try {
 			Map<String, Object> resultMap=new HashMap();
 			Map paramMap;
@@ -512,8 +731,6 @@ public class FacadeControl {
 			}else {
 				resultMap=invalidPay(paramMap);
 				if(resultMap!=null&&resultMap.size()>0) {
-					obj.put("requestCode", "0");
-					obj.put("requestMsg", "参数校验未通过");
 					obj.put("resultMap", resultMap);
 					writeResult(response,obj);
 					return null;
@@ -521,24 +738,9 @@ public class FacadeControl {
 			}
 			// 校验供应商代码暂时不做
 			resultMap=facadeService.pay(paramMap);
-			if(resultMap!=null&&resultMap.size()>0) {
-				obj.put("requestCode", "0");
-				obj.put("requestMsg", "充值成功");
-				resultMap.put("resultCode", "0");
-				resultMap.put("resultMsg", "充值成功");
-				obj.put("resultMap", resultMap);
-				writeResult(response,obj);
-				return null;
-			}else {
-				obj.put("requestCode", "0");
-				obj.put("requestMsg", "充值失败");
-				resultMap=new HashMap<>();
-				resultMap.put("resultCode", "-1");
-				resultMap.put("resultMsg", "充值失败");
-				obj.put("resultMap", resultMap);
-				writeResult(response,obj);
-				return null;
-			}
+			obj.put("resultMap", resultMap);
+			writeResult(response,obj);
+			return null;
 		}catch (CustomException e) { 
 			obj.put("resultCode", "-1");
 			obj.put("resultMsg", "接口异常,"+e.getMessage());
@@ -777,7 +979,7 @@ public class FacadeControl {
 		Map<String,Object> resultMap=new HashMap<String,Object>();
 		String agencyCode=(String) paramMap.get("agencyCode");
 		String accessNums=(String) paramMap.get("accessNums");
-		String state=(String) paramMap.get("state");
+		String bool=(String) paramMap.get("bool");
 		String sign=(String) paramMap.get("sign");
 		// 非空校验
 		if(agencyCode==null||"".equals(agencyCode)){
@@ -790,7 +992,7 @@ public class FacadeControl {
 			resultMap.put("resultMsg", "参数异常;accessNums为必填");
 			return resultMap;
 		}
-		if(state==null||"".equals(state)){
+		if(bool==null||"".equals(bool)){
 			resultMap.put("resultCode", "-1");
 			resultMap.put("resultMsg", "参数异常;state为必填");
 			return resultMap;
@@ -803,7 +1005,44 @@ public class FacadeControl {
 		StringBuffer sbf = new StringBuffer();
 		sbf.append("agencyCode="+agencyCode);
 		sbf.append("&accessNums="+accessNums);
-		sbf.append("&state="+state+"&");
+		sbf.append("&bool="+bool+"&");
+		String signTemp = getMD5(sbf.toString());
+		if(!sign.equals(signTemp)) {
+			resultMap.put("resultCode", "-1");
+			resultMap.put("resultMsg", "参数异常;签名错误");
+			return resultMap;
+		}
+		return resultMap;
+	}
+	/**
+	 * 查询卡状态接口验证
+	 * @param paramMap
+	 * @return
+	 */
+	private Map invalid3(Map paramMap) {
+		Map<String,Object> resultMap=new HashMap<String,Object>();
+		String agencyCode=(String) paramMap.get("agencyCode");
+		String accessNum=(String) paramMap.get("accessNum");
+		String sign=(String) paramMap.get("sign");
+		// 非空校验
+		if(agencyCode==null||"".equals(agencyCode)){
+			resultMap.put("resultCode", "-1");
+			resultMap.put("resultMsg", "参数异常;agencyCode为必填");
+			return resultMap;
+		}
+		if(accessNum==null||"".equals(accessNum)){
+			resultMap.put("resultCode", "-1");
+			resultMap.put("resultMsg", "参数异常;accessNums为必填");
+			return resultMap;
+		}
+		if(sign==null||"".equals(sign)){
+			resultMap.put("resultCode", "-1");
+			resultMap.put("resultMsg", "参数异常;sign为必填");
+			return resultMap;
+		}
+		StringBuffer sbf = new StringBuffer();
+		sbf.append("agencyCode="+agencyCode);
+		sbf.append("&accessNum="+accessNum+"&");
 		String signTemp = getMD5(sbf.toString());
 		if(!sign.equals(signTemp)) {
 			resultMap.put("resultCode", "-1");

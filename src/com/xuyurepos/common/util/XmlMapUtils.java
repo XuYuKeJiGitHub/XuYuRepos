@@ -86,6 +86,21 @@ public class XmlMapUtils {
 	
 	/**
 	 * 
+	 * 通过Map创建XML,Map可以多层转 
+	 * 固定节点parent为Document
+	 * 
+	 * @param params 可自定义根节点
+	 * @return	String-->XML
+	 */
+	public static String createXmlByMap2(Map<String, Object> params,String encoding,String parentName){
+		Document doc = DocumentHelper.createDocument();
+		doc.addElement(parentName);
+		String xml = iteratorXml(doc.getRootElement(),parentName,params,false);
+		return formatXML(xml,encoding);
+	}
+	
+	/**
+	 * 
 	 * MapToXml循环遍历创建xml节点
 	 * 此方法在value中加入CDATA标识符
 	 * 
@@ -335,4 +350,46 @@ public static void main(String[] args) {
 	        return null;
 	    } 
 	}
+	
+	/**
+	 * 将Map转换为XML格式的字符串
+	 *
+	 * @param data Map类型数据
+	 * @return XML格式的字符串
+	 * @throws Exception
+	 */
+	public static String mapToXmlGBK(Map<String, String> map, String parentNode) throws Exception {
+		try {
+			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder documentBuilder= documentBuilderFactory.newDocumentBuilder();
+			org.w3c.dom.Document document = documentBuilder.newDocument();
+			org.w3c.dom.Element root = document.createElement(parentNode);
+			document.appendChild(root);
+			for (String key: map.keySet()) {
+				String value = map.get(key);
+				if (value == null) {
+					value = "";
+				}
+				value = value.trim();
+				org.w3c.dom.Element filed = document.createElement(key);
+				filed.appendChild(document.createTextNode(value));
+				root.appendChild(filed);
+			}
+			TransformerFactory tf = TransformerFactory.newInstance();
+			Transformer transformer = tf.newTransformer();
+			DOMSource source = new DOMSource(document);
+			transformer.setOutputProperty(OutputKeys.ENCODING, "GBK");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			StringWriter writer = new StringWriter();
+			StreamResult result = new StreamResult(writer);
+			transformer.transform(source, result);
+			String output = writer.getBuffer().toString(); //.replaceAll("\n|\r", "");
+			writer.close();
+			return output;
+		} catch (Exception e) {  
+			e.printStackTrace();  
+			return null;
+		} 
+	}
+
 }

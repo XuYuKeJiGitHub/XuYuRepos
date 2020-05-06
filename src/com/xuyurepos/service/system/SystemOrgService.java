@@ -6,6 +6,7 @@ import com.xuyurepos.common.page.PageModel;
 import com.xuyurepos.entity.system.SystemOrg;
 import com.xuyurepos.vo.system.SystemOrgVo;
 
+
 public interface SystemOrgService {
     // 分页查询
 	@SuppressWarnings("rawtypes")

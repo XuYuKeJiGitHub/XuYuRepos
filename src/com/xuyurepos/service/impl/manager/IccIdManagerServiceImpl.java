@@ -4,6 +4,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.log4j.Logger;
@@ -34,6 +36,7 @@ import com.xuyurepos.dao.comm.CommonMapper;
 import com.xuyurepos.dao.manager.XuyuContentCardInfoDao;
 import com.xuyurepos.dao.manager.XuyuContentCardMgrDao;
 import com.xuyurepos.dao.manager.XuyuMessageLogDao;
+import com.xuyurepos.entity.manager.GPRSDosageInfo;
 import com.xuyurepos.entity.manager.XuyuContentCardInfo;
 import com.xuyurepos.entity.manager.XuyuContentCardMgr;
 import com.xuyurepos.entity.manager.XuyuMessageLog;
@@ -85,6 +88,14 @@ public class IccIdManagerServiceImpl implements IccIdManagerService{
 	    connection = sqlSession.getConnection();  
 	    return connection;  
 	} 
+	
+	@Override
+	public ArrayList<GPRSDosageInfo> findGPRSInfo() {
+		
+		ArrayList<GPRSDosageInfo> arrayList = xuyuContentCardInfoDao.findGPRSInfo();
+		
+		return arrayList;
+	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
@@ -182,7 +193,7 @@ public class IccIdManagerServiceImpl implements IccIdManagerService{
 	 * @throws CustomException 
 	 */
 	@Override
-	public void userStatusQuery(XuyuMessageLogVo xuyuMessageLogVo) throws CustomException {
+	public String userStatusQuery(XuyuMessageLogVo xuyuMessageLogVo) throws CustomException {
 		String accessNums=xuyuMessageLogVo.getAccessNums();
 		String workingCondition=SystemConstants.STRINGEMPTY;
 		if(accessNums!=null&&!SystemConstants.STRINGEMPTY.equals(accessNums)){
@@ -198,11 +209,24 @@ public class IccIdManagerServiceImpl implements IccIdManagerService{
 						// 分别判定
 						if("1".equals(ownerPlace)){// 淮安
 							workingCondition=synInfoJSFacadeService.mobileUserStatusQuery(contentCardInfo.getAccessNum(), ownerPlace);
+							logger.info("淮安查询状态码"+workingCondition);
+							if("1".equals(workingCondition)){
+								logger.info("*************淮安修改數據庫状态*********");
+								xuyuContentCardInfoDao.updateCardState(contentCardInfo.getAccessNum(), "00");
+							}else{
+								xuyuContentCardInfoDao.updateCardState(contentCardInfo.getAccessNum(), "02");
+							}
 						}else if("2".equals(ownerPlace)){// 盐城
 							workingCondition=synInfoJSFacadeService.mobileUserStatusQuery(contentCardInfo.getAccessNum(), ownerPlace);
+							logger.info("盐城查询状态码"+workingCondition);
+							if("1".equals(workingCondition)){
+								logger.info("*************淮安修改數據庫状态*********");
+								xuyuContentCardInfoDao.updateCardState(contentCardInfo.getAccessNum(), "00");
+							}else{
+								xuyuContentCardInfoDao.updateCardState(contentCardInfo.getAccessNum(), "02");
+							}
 						}else if("3".equals(ownerPlace)){// 闵行 -- 更新流量
 							workingCondition=synInfoFacadeService.mobileUserStatusQuery(contentCardInfo.getAccessNum());
-							//xuyuContentCardInfoDao.updateCardState(contentCardInfo.getAccessNum(), workingCondition);
 						}else if("4".equals(ownerPlace)){// 奉贤
 							synInfoFacadeService.mobileUserStatusQueryFengXian(contentCardInfo.getAccessNum(), ownerPlace);
 						}else{// 其他  走闵行
@@ -216,7 +240,8 @@ public class IccIdManagerServiceImpl implements IccIdManagerService{
 				}else if("3".equals(contentCardInfo.getProvider())){//电信
 					workingCondition=synInfoFacadeService.telecomUserStatusQuery(contentCardInfo.getAccessNum(),ownerPlace);
 				}
-				System.out.println("数据状态："+workingCondition);
+				
+				/*System.out.println("数据状态："+workingCondition);
 				if(!SystemConstants.STRINGEMPTY.equals(workingCondition)){
 					try {
 						// 移动
@@ -232,11 +257,14 @@ public class IccIdManagerServiceImpl implements IccIdManagerService{
 					} catch (Exception e){
 						e.printStackTrace();
 						throw new CustomException("用户状态更新失败");
-					
 					}
-				}
+				}*/
 			}
-			
+		}
+		if("1".equals(workingCondition)){
+			return "00";
+		}else{
+			return "02";
 		}
 	}
     
@@ -376,20 +404,42 @@ public class IccIdManagerServiceImpl implements IccIdManagerService{
 //		gprs="1600MB";
 		return gprs;
 	}
-    
+	/**
+	 * 查看卡所对应的城市编号
+	 * @param 卡号
+	 * @throws CustomException 
+	 */
+	@Override
+	public XuyuContentCardInfo findCardOwnerPlace(String accessNums){
+		String ownerPlace = SystemConstants.STRINGEMPTY;
+		XuyuContentCardInfo contentCardInfo=xuyuContentCardInfoDao.find(accessNums);
+		return contentCardInfo;
+	}	
+	private String getMD5(String str) {
+		String key="xuYuRepos2019";
+		String signStr=str+"key="+key;//&key
+		String sign=DigestUtils.md5Hex(signStr).toUpperCase();
+		return sign;
+	}
+	private static final String huaianPLTFJ="http://192.168.1.116:8081/XuYuRepos/facade/changeCardStateAll";
+	private static final String yanchengPLTFJ="http://47.101.207.177:8080/XuYuRepos/facade/changeCardStateAll";
 	/**
 	 * 停复机
 	 * @param xuyuMessageLogVo
 	 * @throws CustomException 
 	 */
 	@Override
-	public void changeCardState(String accessNums,String bool) throws CustomException {
+	public String changeCardState(String accessNums,String bool) throws CustomException {
 		if(accessNums!=null&&!SystemConstants.STRINGEMPTY.equals(accessNums)){
 			XuyuContentCardInfo contentCardInfo=xuyuContentCardInfoDao.find(accessNums);
 			if(contentCardInfo!=null){
 				SynInfoFacadeService synInfoFacadeService=SynInfoFacadeService.getInstance();
 				SynInfoJSFacadeService synInfoJSFacadeService=SynInfoJSFacadeService.getInstance();
 				String ownerPlace=contentCardInfo.getOwnerPlace();
+				
+				XuyuContentCardInfo xuyuContentCardInfo = xuyuContentCardInfoDao.find(contentCardInfo.getAccessNum());
+				String remainGps = xuyuContentCardInfo.getRemainGps().toString();
+				double parseDouble = Double.parseDouble(remainGps);
 				
 				// 判定运营商
 				if("1".equals(contentCardInfo.getProvider())){// 移动
@@ -398,27 +448,65 @@ public class IccIdManagerServiceImpl implements IccIdManagerService{
 						// 分别判定
 						if("1".equals(ownerPlace)){// 淮安
 							if("false".equals(bool)){
-								synInfoJSFacadeService.mobileChangeCardState(contentCardInfo.getAccessNum(), "2", ownerPlace);
-								xuyuContentCardInfoDao.updateCardState(contentCardInfo.getAccessNum(), "00");
+								
+								if(parseDouble>=30){//余额大于30，进行复机
+									String mobileChangeCardState = synInfoJSFacadeService.mobileChangeCardState(contentCardInfo.getAccessNum(), "2", ownerPlace);
+									if(SystemConstants.STATE_CG.equals(mobileChangeCardState)){
+										xuyuContentCardInfoDao.updateCardState(contentCardInfo.getAccessNum(), "00");
+									}
+									return mobileChangeCardState;
+								}else{
+									return SystemConstants.STATE_YEBZ;
+								}
+								
 							}else{
-								synInfoJSFacadeService.mobileChangeCardState(contentCardInfo.getAccessNum(), "1", ownerPlace);
-								xuyuContentCardInfoDao.updateCardState(contentCardInfo.getAccessNum(), "02");
+								
+								String mobileChangeCardState  = synInfoJSFacadeService.mobileChangeCardState(contentCardInfo.getAccessNum(), "1", ownerPlace);
+								if(SystemConstants.STATE_CG.equals(mobileChangeCardState)){
+									xuyuContentCardInfoDao.updateCardState(contentCardInfo.getAccessNum(), "02");
+								}
+								return mobileChangeCardState;
+								
 							}
 						}else if("2".equals(ownerPlace)){// 盐城
 							if("false".equals(bool)){//是否停机
-								//1 停机  ；2复机    调接口修改第三方
-								synInfoJSFacadeService.mobileChangeCardState(contentCardInfo.getAccessNum(), "2", ownerPlace);
-								//修改数据库 卡的状态
-								xuyuContentCardInfoDao.updateCardState(contentCardInfo.getAccessNum(), "00");
+								
+								if(parseDouble>=30){//余额大于30，进行复机
+									String mobileChangeCardState = synInfoJSFacadeService.mobileChangeCardState(contentCardInfo.getAccessNum(), "2", ownerPlace);
+									if(SystemConstants.STATE_CG.equals(mobileChangeCardState)){
+										xuyuContentCardInfoDao.updateCardState(contentCardInfo.getAccessNum(), "00");
+									}
+									return mobileChangeCardState;
+								}else{
+									return SystemConstants.STATE_YEBZ;
+								}
+								
 							}else{
-								synInfoJSFacadeService.mobileChangeCardState(contentCardInfo.getAccessNum(), "1", ownerPlace);
-								xuyuContentCardInfoDao.updateCardState(contentCardInfo.getAccessNum(), "02");
+								
+								String mobileChangeCardState  = synInfoJSFacadeService.mobileChangeCardState(contentCardInfo.getAccessNum(), "1", ownerPlace);
+								if(SystemConstants.STATE_CG.equals(mobileChangeCardState)){
+									xuyuContentCardInfoDao.updateCardState(contentCardInfo.getAccessNum(), "02");
+								}
+								return mobileChangeCardState;
+								
 							}
 						}else if("3".equals(ownerPlace)){// 闵行
 							if("false".equals(bool)){
-								synInfoFacadeService.mobileChangeCardState(contentCardInfo.getAccessNum(),"1");
+								boolean mobileChangeCardState = synInfoFacadeService.mobileChangeCardState(contentCardInfo.getAccessNum(),"1");
+								if(mobileChangeCardState){
+									xuyuContentCardInfoDao.updateCardState(contentCardInfo.getAccessNum(), "00");
+									return SystemConstants.STATE_CG;
+								}else{
+									return SystemConstants.STATE_SB;
+								}
 							}else{
-								synInfoFacadeService.mobileChangeCardState(contentCardInfo.getAccessNum(),"0");
+								boolean mobileChangeCardState = synInfoFacadeService.mobileChangeCardState(contentCardInfo.getAccessNum(),"0");
+								if(mobileChangeCardState){
+									xuyuContentCardInfoDao.updateCardState(contentCardInfo.getAccessNum(), "02");
+									return SystemConstants.STATE_CG;
+								}else{
+									return SystemConstants.STATE_SB;
+								}
 							}
 						}else if("4".equals(ownerPlace)){// 奉贤
 							if("false".equals(bool)){
@@ -434,18 +522,17 @@ public class IccIdManagerServiceImpl implements IccIdManagerService{
 					}else{
 						synInfoFacadeService.unicomChangeCardState(contentCardInfo.getIccid(),"0");
 					}
-					
 				}else if("3".equals(contentCardInfo.getProvider())){//电信
 					if("false".equals(bool)){
 						synInfoFacadeService.telecomChangeCardState(contentCardInfo.getAccessNum(),"1",ownerPlace);
 					}else{
 						synInfoFacadeService.telecomChangeCardState(contentCardInfo.getAccessNum(),"0",ownerPlace);
 					}
-					
 				}
 			}
 			
 		}
+		return SystemConstants.STATE_CG;
 	}
     
 	/**

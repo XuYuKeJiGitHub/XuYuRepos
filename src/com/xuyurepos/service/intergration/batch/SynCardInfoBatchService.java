@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.xuyurepos.common.constants.SystemConstants;
 import com.xuyurepos.dao.batch.CardStateChangeDao;
 import com.xuyurepos.dao.comm.CommonMapper;
 import com.xuyurepos.entity.manager.XuyuContentCardInfo;
@@ -393,7 +394,12 @@ public class SynCardInfoBatchService {
 				}
 			}
 			if (ownerPlace.equals("1") || ownerPlace.equals("2")) {
-				result = SynInfoJSFacadeService.getInstance().mobileChangeCardState(mssidn, operType,ownerPlace);
+				String status = SynInfoJSFacadeService.getInstance().mobileChangeCardState(mssidn, operType,ownerPlace);
+				if(SystemConstants.STRING_YES.equals(status)){
+					result = true;
+				}else {
+					result = false;
+				}
 			} else {
 				result = SynInfoFacadeService.getInstance().mobileChangeCardState(mssidn, operType);
 			}

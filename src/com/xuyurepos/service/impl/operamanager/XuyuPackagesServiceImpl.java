@@ -245,6 +245,7 @@ public class XuyuPackagesServiceImpl implements XuyuPackagesService{
 		sb.append(" select ");
 		sb.append(" ACCESS_NUM  accessNum, ");
 		sb.append(" ICCID  iccid, ");
+		sb.append(" OWNER_PLACE ownerPlace,");
 		sb.append(" case when t1.PROVIDER='1' then  ");
         sb.append(" (select a1.F_VALUE from SYSTEM_LOOKUP_ITEM a1 where a1.F_LOOKUP_ID='MOBILE_CARD_STATU'  and a1.F_CODE=t1.WORKING_CONDITION) ");
         sb.append("  when t1.PROVIDER='2' then ");

@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.xuyurepos.common.constants.SystemConstants;
 import com.xuyurepos.service.intergration.facade.SynInfoFacadeService;
 import com.xuyurepos.service.intergration.facade.SynInfoJSFacadeService;
 
@@ -59,7 +60,13 @@ public class ProviderSupportService {
 			if (StringUtils.isNotBlank(provider) && provider.equals("1")) {
 				if (StringUtils.isNotBlank(ownerPlace)) {
 					if (ownerPlace.equals("1") || ownerPlace.equals("2")) {
-						result = SynInfoJSFacadeService.getInstance().mobileChangeCardState(cardNo, operType,ownerPlace);
+						String status = SynInfoJSFacadeService.getInstance().mobileChangeCardState(cardNo, operType,ownerPlace);
+						if(SystemConstants.STRING_YES.equals(status)){
+							result = true;
+						}else {
+							result = false;
+						}
+					
 					} else if (ownerPlace.equals("3")) {
 						result = SynInfoFacadeService.getInstance().mobileChangeCardState(cardNo, operType);
 					}

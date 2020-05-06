@@ -1,6 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans-4.2.dtd">
 <beans>    
+        <!--  ***************批量上报GPRS用量信息******************开始 -->
+        <!-- 要调用的工作类 -->
+        <bean id="reportedCardGPRSInfoJob" class="com.xuyurepos.common.util.quartz.QuartzReportedCardInfoJob"></bean><!-- l -->
+        
+        <!-- 定义调用对象和调用对象的方法 -->
+        <bean id="reportedCardGPRSInfoJobtask" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean"><!-- f -->
+            <!-- 调用的类 -->
+            <property name="targetObject">												<!-- 1 -->
+                <ref bean="reportedCardGPRSInfoJob"/><!-- l -->
+            </property>
+            <!-- 调用类中的方法 -->
+            <property name="targetMethod">												<!-- 2 -->
+                <value>execute</value>	<!-- 对应方法 -->
+            </property>
+        </bean>
+        <!-- 定义触发时间 -->
+        <bean id="reportedCardGPRSInfoCron" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+            <property name="jobDetail">
+                <ref bean="reportedCardGPRSInfoJobtask"/><!-- f -->
+            </property>
+            <!-- cron表达式 -->
+            <property name="cronExpression">
+                <value>0 0 3 * * ? </value>
+            </property>
+        </bean>
+        <!--  ***************批量上报GPRS用量信息******************结束 -->
+        
+        
         <!-- 要调用的工作类 -->
         <bean id="quartzJob" class="com.xuyurepos.common.util.quartz.QuartzJob"></bean>
         
@@ -220,10 +248,12 @@
                     <ref bean="cleanUnionSynCron"/>
                     <ref bean="doAuToRuleJob"/>
                     <ref bean="doAuToRulePercentJob"/>
-<!--                     <ref bean="batchSynCron"/> -->
+			 <!--   <ref bean="batchSynCron"/> -->
 					<ref bean="batchSynStateCron"/>	
+					<ref bean="reportedCardGPRSInfoCron"/>	
                 </list>
             </property>
         </bean>
+        
     
 </beans>

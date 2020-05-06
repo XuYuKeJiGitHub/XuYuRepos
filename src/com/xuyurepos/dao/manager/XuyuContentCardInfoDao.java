@@ -1,11 +1,13 @@
 package com.xuyurepos.dao.manager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
 import com.xuyurepos.common.page.PageModel;
+import com.xuyurepos.entity.manager.GPRSDosageInfo;
 import com.xuyurepos.entity.manager.XuyuContentCardInfo;
 
 /**
@@ -166,5 +168,7 @@ public interface XuyuContentCardInfoDao {
 	public void updateDeadlineDateNew(@Param("chargeCost")String chargeCost,@Param("numType")String numType);
 
 	public void updateCardState(@Param("accessNum")String accessNum, @Param("state")String state);
+
+	public ArrayList<GPRSDosageInfo> findGPRSInfo();
 
 }

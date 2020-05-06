@@ -817,14 +817,18 @@ obj={
                       $("#showMsg").html(request);  //登录错误提示信息
                   },
                   success:function(data) {
-	                	if(data.sucess!=undefined&&data.sucess==false){
-	                		$.messager.alert('信息提示',data.msg,'error');
-	                	}else{
-	                		$.messager.show({
+                	 if(data=="-2"){
+                		$.messager.show({
                             title:'提示信息',
-                            msg:"操作成功"
-                        })
-	                	}
+                            msg:"此卡号暂不支持状态刷新操作，详情请联系管理员"
+                		})
+                	}else{
+                		$("#table").datagrid('reload');
+                		$.messager.show({
+                            title:'提示信息',
+                            msg:"卡状态刷新成功"
+                		})
+                	}
                   }            
                });
         },// 备注
@@ -1083,7 +1087,7 @@ obj={
                                                       
                                               },
                                               success:function (data) {
-                                                      if(data){
+                                                      if(data=='0'){
                                                               $("#table").datagrid('loaded');
                                                               $("#table").datagrid('load');
                                                               $("#table").datagrid('unselectAll');
@@ -1091,13 +1095,27 @@ obj={
                                                                       title:'提示',
                                                                       msg:num+'个用户被停复机'
                                                               })
-                                                      }
-                                                      else{
+                                                      }else if(data=='1'){
                                                               $.messager.show({
                                                                       title:'警示信息',
                                                                       msg:"停复机失败"
                                                               })
-                                                      }
+                                                      }else if(data=='3'){
+                                                          $.messager.show({
+                                                              title:'警示信息',
+                                                              msg:"余额不足 不能复机"
+                                                          })
+                                                      }else if(data=='-2'){
+                                                          $.messager.show({
+                                                              title:'警示信息',
+                                                              msg:"此卡号暂不支持停复机操作，详情请联系管理员"
+                                                          })
+                                                      }else {//-1
+                                                          $.messager.show({
+                                                              title:'警示信息',
+                                                              msg:"请十分钟之后再对此卡号进行停复机操作"
+                                                          })
+                                                     }  
                                               }
                                       })
                                }

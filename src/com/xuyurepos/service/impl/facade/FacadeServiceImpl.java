@@ -11,10 +11,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.xuyurepos.common.constants.SystemConstants;
 import com.xuyurepos.common.exception.CustomException;
 import com.xuyurepos.common.log.LoggerFactory;
@@ -27,6 +29,7 @@ import com.xuyurepos.entity.payment.XuyuRecharge;
 import com.xuyurepos.service.facade.FacadeService;
 import com.xuyurepos.service.manager.IccIdManagerService;
 import com.xuyurepos.service.payment.XuyuRechargeService;
+import com.xuyurepos.util.HttpClientUtil;
 import com.xuyurepos.vo.manager.XuyuMessageLogVo;
 /**
  * 外部查询接口实现类
@@ -223,8 +226,17 @@ public class FacadeServiceImpl implements FacadeService{
 		}
 	}
 
+	private String getMD5(String str) {
+		String key="xuYuRepos2019";
+		String signStr=str+"key="+key;//&key
+		String sign=DigestUtils.md5Hex(signStr).toUpperCase();
+		return sign;
+	}
+	private static final String huaianPLTFJ="http://47.102.220.16:8080/XuYuRepos/facade/changeCardStateAll";
+	private static final String yanchengPLTFJ="http://47.101.207.177:8080/XuYuRepos/facade/changeCardStateAll";
+	
 	@Override
-	public Map<String, Object> pay(Map paramMap) throws CustomException {
+	public Map<String, Object> pay(Map paramMap) throws Exception {
 
 		String agencyCode=(String) paramMap.get("agencyCode");
 		String accessNum=(String) paramMap.get("accessNum");
@@ -251,9 +263,81 @@ public class FacadeServiceImpl implements FacadeService{
 			}
 			System.out.println("充值接入号："+accessNum);
 			backOrder(payId, accessNum, yc,agencyCode);
+			
 			Map<String, Object> resultMap=new HashMap();
 			resultMap.put("resultCode", "0");
 			resultMap.put("resultMsg", "充值成功");
+			//充值成功去数据库查询--判断是不是盐城或淮安的卡
+			XuyuContentCardInfo contentCardInfo=xuyuContentCardInfoDao.find(accessNum);
+			String ownerPlace = contentCardInfo.getOwnerPlace();
+			String provider = contentCardInfo.getProvider();
+			
+			
+			StringBuffer sbf = new StringBuffer();
+			sbf.append("agencyCode=xuyu");
+			sbf.append("&accessNums="+accessNum);
+			String bool = SystemConstants.STATE_FJ;
+			sbf.append("&bool="+bool+"&");
+			String sign = getMD5(sbf.toString());
+			String changeCardState = "";
+			if ("1".equals(provider) && "1".equals(ownerPlace))
+				try {
+					{//淮安
+						String url = huaianPLTFJ;
+						HashMap<String, Object> params = new HashMap<>();
+						params.put("agencyCode", "xuyu");
+						params.put("accessNums", accessNum);
+						params.put("bool", bool);
+						params.put("sign", sign);
+						String post = HttpClientUtil.doPost(url, params);
+						JSONObject parseObject = JSONObject.parseObject(post);
+						changeCardState = (String) parseObject.get("requestCode"); 
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			else if("1".equals(provider) && "2".equals(ownerPlace))
+				try {
+					{//盐城
+						String url = yanchengPLTFJ;
+						HashMap<String, Object> params = new HashMap<>();
+						params.put("agencyCode", "xuyu");
+						params.put("accessNums", accessNum);
+						params.put("bool", bool);
+						params.put("sign", sign);
+						String post = HttpClientUtil.doPost(url, params);
+						JSONObject parseObject = JSONObject.parseObject(post);
+						changeCardState = (String) parseObject.get("requestCode");
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			else{
+				/*bool = "false";
+				changeCardState = iccIdManagerService.changeCardState(accessNum,bool);*/
+				changeCardState = SystemConstants.STATE_ZBZC;
+			}
+			if(SystemConstants.STATE_CG.equals(changeCardState)){
+				resultMap.put("requestCode", "0");
+				resultMap.put("requestMsg", "复机操作成功");
+			}else if(SystemConstants.STATE_SB.equals(changeCardState)){
+				resultMap.put("requestCode", "1");
+				resultMap.put("requestMsg", "复机操作失败");
+			}else if(SystemConstants.STATE_PF.equals(changeCardState)){
+				resultMap.put("requestCode", "-1");
+				resultMap.put("requestMsg", "十分钟内做用户状态修改业务次数不得大于三次");
+			}else if(SystemConstants.STATE_YEBZ.equals(changeCardState)){
+				resultMap.put("requestCode", "3");
+				resultMap.put("requestMsg", "余额不足，不能复机");
+			}else if(SystemConstants.STATE_ZBZC.equals(changeCardState)){
+				resultMap.put("requestCode", "-2");
+				resultMap.put("requestMsg", "该地区卡号暂不支持停复机操作");
+			}else{
+				resultMap.put("requestCode", "2");
+				resultMap.put("requestMsg", "系统或请求异常");
+			}
 		    return resultMap;
 		}
 	}

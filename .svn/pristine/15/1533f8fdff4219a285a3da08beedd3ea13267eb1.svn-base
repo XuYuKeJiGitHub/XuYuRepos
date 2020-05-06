@@ -1,8 +1,0 @@
-#系统默认配置文件
-uploadPath=/ormsstach/upload
-importPath=/ormsstach/import
-exportPath=/ormsstach/export
-syncexportPath=/ormsstach/syncexport
-#下载数量限制
-downLoadSize=10000
-maxUploadFileSize=153600000

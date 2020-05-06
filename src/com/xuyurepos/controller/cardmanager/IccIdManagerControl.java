@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,9 +21,12 @@ import com.xuyurepos.common.constants.SystemConstants;
 import com.xuyurepos.common.exception.BizException;
 import com.xuyurepos.common.log.LoggerFactory;
 import com.xuyurepos.common.page.PageModel;
+import com.xuyurepos.controller.facade.FacadeControl;
+import com.xuyurepos.entity.manager.XuyuContentCardInfo;
 import com.xuyurepos.service.manager.IccIdManagerService;
 import com.xuyurepos.service.system.SystemOrgService;
 import com.xuyurepos.service.system.XuyuDownService;
+import com.xuyurepos.util.HttpClientUtil;
 import com.xuyurepos.vo.manager.XuyuContentCardMgrSelfVo;
 import com.xuyurepos.vo.manager.XuyuMessageLogVo;
 import com.xuyurepos.vo.system.SystemOrgVo;
@@ -34,7 +38,7 @@ import com.xuyurepos.vo.system.SystemOrgVo;
 @Controller
 @RequestMapping(value = "/iccidmanager")
 public class IccIdManagerControl {
-	
+	Logger logger=LoggerFactory.getInstance().getLogger(FacadeControl.class);
 	@Autowired
 	private BizException bizException; 
 	
@@ -205,14 +209,56 @@ public class IccIdManagerControl {
 	 * @param response
 	 * @return
 	 */
+	private static final String huaianZTCX="http://47.102.220.16:8080/XuYuRepos/facade/userStatusQuery";
+	private static final String yanchengZTCX="http://47.101.207.177:8080/XuYuRepos/facade/userStatusQuery";
+	
 	@RequestMapping(value = "/userStatusQuery", produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public String userStatusQuery(XuyuMessageLogVo xuyuMessageLogVo,HttpServletRequest request,HttpServletResponse response) {
 		try {
-			Map<String, Object> map = new HashMap<String, Object>();
-			iccIdManagerService.userStatusQuery(xuyuMessageLogVo);
-			map.put("sucess", true);
-			String result = JSONObject.toJSONString(map);
+			XuyuContentCardInfo xuyuContentCardInfo = iccIdManagerService.findCardOwnerPlace(xuyuMessageLogVo.getAccessNums());
+			String ownerPlace = xuyuContentCardInfo.getOwnerPlace();
+			String provider = xuyuContentCardInfo.getProvider();
+			
+			StringBuffer sbf = new StringBuffer();
+			sbf.append("agencyCode=xuyu");
+			sbf.append("&accessNum="+xuyuMessageLogVo.getAccessNums()+"&");
+			String sign = getMD5(sbf.toString());
+			String status = null;
+			String result = null;
+			String url = null;
+			if ("1".equals(provider) && "1".equals(ownerPlace)) {//淮安
+				url = huaianZTCX;
+				HashMap<String, Object> params = new HashMap<>();
+				params.put("agencyCode", "xuyu");
+				params.put("accessNum", xuyuMessageLogVo.getAccessNums());
+				params.put("sign", sign);
+				String post = HttpClientUtil.doPost(url, params);
+				JSONObject parseObject = JSONObject.parseObject(post);
+				status = (String) parseObject.get("status");
+				if ("00".equals(status)) {
+					return "0";
+				}else{
+					return "1";
+				}
+			}else if("1".equals(provider) && "2".equals(ownerPlace)){//盐城
+				url = yanchengZTCX;
+				HashMap<String, Object> params = new HashMap<>();
+				params.put("agencyCode", "xuyu");
+				params.put("accessNum", xuyuMessageLogVo.getAccessNums());
+				params.put("sign", sign);
+				String post = HttpClientUtil.doPost(url, params);
+				JSONObject parseObject = JSONObject.parseObject(post);
+				status = (String) parseObject.get("status");
+				if ("00".equals(status)) {
+					return "0";
+				}else{
+					return "1";
+				}
+			}else{
+				//status = iccIdManagerService.userStatusQuery(xuyuMessageLogVo);//其他
+				result = SystemConstants.STATE_ZBZC;
+			}
 			return result;
 		}catch (Exception e) {
 			bizException.resolveException(request, response, 1011, e);
@@ -272,6 +318,14 @@ public class IccIdManagerControl {
 	 * @param response
 	 * @return
 	 */
+	private String getMD5(String str) {
+		String key="xuYuRepos2019";
+		String signStr=str+"key="+key;//&key
+		String sign=DigestUtils.md5Hex(signStr).toUpperCase();
+		return sign;
+	}
+	private static final String huaianPLTFJ="http://47.102.220.16:8080/XuYuRepos/facade/changeCardStateAll";
+	private static final String yanchengPLTFJ="http://47.101.207.177:8080/XuYuRepos/facade/changeCardStateAll";
 	@RequestMapping(value = "/changeCardStateAll", produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public String changeCardStateAll(XuyuMessageLogVo xuyuMessageLogVo,HttpServletRequest request,HttpServletResponse response) {
@@ -279,25 +333,92 @@ public class IccIdManagerControl {
 			String bool = request.getParameter("bool");
 			XuyuMessageLogVo xuyuMessageLogVoStatue=null;
 			Map<String, Object> map = new HashMap<String, Object>();
+			String result = SystemConstants.STATE_CG;//成功
+			//boolean status = true;
 			if(xuyuMessageLogVo.getAccessNums()!=null&&!SystemConstants.STRINGEMPTY.equals(xuyuMessageLogVo.getAccessNums())){
 				String[] accessNumStr=xuyuMessageLogVo.getAccessNums().split(";");
 				if(accessNumStr.length>0){
 					for (int i = 0; i < accessNumStr.length; i++) {
-					    iccIdManagerService.changeCardState(accessNumStr[i],bool);
-					    xuyuMessageLogVoStatue=new XuyuMessageLogVo();
+					    /*String changeCardState = iccIdManagerService.changeCardState(accessNumStr[i],bool);*/
+						// 1:淮安  2：盐城
+					    /*xuyuMessageLogVoStatue=new XuyuMessageLogVo();
 					    xuyuMessageLogVoStatue.setAccessNums(accessNumStr[i]);
-					    iccIdManagerService.userStatusQuery(xuyuMessageLogVoStatue);
+					    iccIdManagerService.userStatusQuery(xuyuMessageLogVoStatue);*/
+						XuyuContentCardInfo xuyuContentCardInfo = iccIdManagerService.findCardOwnerPlace(accessNumStr[i]);
+						String ownerPlace = xuyuContentCardInfo.getOwnerPlace();
+						String provider = xuyuContentCardInfo.getProvider();
+						StringBuffer sbf = new StringBuffer();
+						sbf.append("agencyCode=xuyu");
+						sbf.append("&accessNums="+accessNumStr[i]);
+						if("false".equals(bool)){
+							bool = SystemConstants.STATE_FJ;
+						}else{
+							bool = SystemConstants.STATE_TJ;
+						}
+						sbf.append("&bool="+bool+"&");
+						String sign = getMD5(sbf.toString());
+						String changeCardState = "";
+						if ("1".equals(provider) && "1".equals(ownerPlace)) {//淮安
+							String url = huaianPLTFJ;
+							HashMap<String, Object> params = new HashMap<>();
+							params.put("agencyCode", "xuyu");
+							params.put("accessNums", accessNumStr[i]);
+							params.put("bool", bool);
+							params.put("sign", sign);
+							String post = HttpClientUtil.doPost(url, params);
+							JSONObject parseObject = JSONObject.parseObject(post);
+							changeCardState = (String) parseObject.get("requestCode"); 
+						}else if("1".equals(provider) && "2".equals(ownerPlace)){//盐城
+							String url = yanchengPLTFJ;
+							HashMap<String, Object> params = new HashMap<>();
+							params.put("agencyCode", "xuyu");
+							params.put("accessNums", accessNumStr[i]);
+							params.put("bool", bool);
+							params.put("sign", sign);
+							String post = HttpClientUtil.doPost(url, params);
+							JSONObject parseObject = JSONObject.parseObject(post);
+							changeCardState = (String) parseObject.get("requestCode");
+						}else{
+							/*if(SystemConstants.STATE_FJ.equals(bool)){
+								bool = "false";
+							}else{
+								bool = "true";
+							}
+							changeCardState = iccIdManagerService.changeCardState(accessNumStr[i],bool);*/
+							changeCardState = SystemConstants.STATE_ZBZC;
+						}
+						logger.info("停复机内部返回状态码："+changeCardState);
+					    if(SystemConstants.STATE_CG.equals(changeCardState)){
+					    	result = SystemConstants.STATE_CG;//成功
+					    }
+					    if(SystemConstants.STATE_SB.equals(changeCardState)){
+					    	result = SystemConstants.STATE_SB;//失败
+					    }
+					    if(SystemConstants.STATE_PF.equals(changeCardState)){
+					    	result = SystemConstants.STATE_PF;//频繁操作
+					    }
+					    if(SystemConstants.STATE_YC.equals(changeCardState)){//系统或请求异常
+					    	result = SystemConstants.STATE_SB;//失败
+					    }
+					    if(SystemConstants.STATE_YEBZ.equals(changeCardState)){//余额不足 不能复机
+					    	result = SystemConstants.STATE_YEBZ;//余额不足 不能复机
+					    }
+					    if(SystemConstants.STATE_ZBZC.equals(changeCardState)){//暂不支持停复机
+					    	result = SystemConstants.STATE_ZBZC;//暂不支持停复机
+					    }
 					}
 				}
 			}
-			map.put("sucess", true);
-			String result = JSONObject.toJSONString(map);
+			
+			/*map.put("sucess", status);
+			String result = JSONObject.toJSONString(map);*/
 			return result;
 		}catch (Exception e) {
 			bizException.resolveException(request, response, 1011, e);
 			return null;
 		}
 	}
+	
 	
 	/**
 	 * 导入更新

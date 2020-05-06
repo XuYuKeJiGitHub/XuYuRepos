@@ -15,7 +15,7 @@ public interface FacadeService {
 
 	public List<Map<String, Object>> rechargeQuery(Map paramMap)throws CustomException;
 
-	public Map<String, Object> pay(Map paramMap)throws CustomException;
+	public Map<String, Object> pay(Map paramMap)throws CustomException, Exception;
 
 	public Map<String, Object> singleGprsInfoQueryIccid(Map paramMap)throws CustomException;
 

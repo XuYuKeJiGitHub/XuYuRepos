@@ -1,9 +1,0 @@
-package com.xuyurepos.service.manager;
-
-import java.util.Map;
-
-public interface XuyuContentCardInfoImportService {
-
-	public Map<String, Object> exportModel();
-
-}

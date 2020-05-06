@@ -59,6 +59,7 @@ public class MobileCMPRequest {
 		
 	}
 	
+	
 	private  static  Map  initWholeByYanCheng() {
 		Map map=new HashMap();
 		map.put("appid", "GHS75WIDMEUK7P")	;
@@ -66,7 +67,6 @@ public class MobileCMPRequest {
         return map;
 		
 	}
-	
 	
 	
 	

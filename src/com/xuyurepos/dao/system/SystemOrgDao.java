@@ -1,11 +1,14 @@
 package com.xuyurepos.dao.system;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
 import com.xuyurepos.common.page.PageModel;
+import com.xuyurepos.entity.manager.GPRSDosageInfo;
 import com.xuyurepos.entity.system.SystemOrg;
+
 
 public interface SystemOrgDao {
 	/**
@@ -55,5 +58,10 @@ public interface SystemOrgDao {
 	 * @return
 	 */
 	public String getMaxOrgId(@Param("upOrgId")String upOrgId, @Param("orgLevel")Integer orgLevel,@Param("dept")String dept);
+	/**
+	 * 批量上报GPRS用量信息
+	 * @return
+	 */
+	public ArrayList<GPRSDosageInfo> findAll();
 
 }

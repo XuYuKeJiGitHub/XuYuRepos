@@ -1,1 +1,7 @@
+/apiclient_cert.p12
 /com/
+/database.properties
+/log4j.properties
+/mybatis-config-wap.xml
+/mybatis-config.xml
+/system.properties

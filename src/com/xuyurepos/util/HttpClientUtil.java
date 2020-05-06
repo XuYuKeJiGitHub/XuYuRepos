@@ -7,7 +7,8 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;  
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -27,6 +28,9 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.xuyurepos.common.util.XmlMapUtils;
 import com.xuyurepos.service.intergration.facade.SynInfoJSFacadeService;
 
 /* 
@@ -189,37 +193,41 @@ public class HttpClientUtil {
         return responseString;   
 
   	}
-  	/*public static String postXML(String url,String xmlFileName){
-  		CloseableHttpClient client = null;
-  		CloseableHttpResponse resp = null;
-  		try{
-  			HttpPost httpPost = new HttpPost(url);
-  			httpPost.setHeader("Content-Type", "text/xml; charset=UTF-8");
-  			client = HttpClients.createDefault();
-  			StringEntity entityParams = new StringEntity(xmlFileName,"utf-8");
-  			httpPost.setEntity(entityParams);
-  			client = HttpClients.createDefault();
-  			resp = client.execute(httpPost);
-  			String resultMsg = EntityUtils.toString(resp.getEntity(),"utf-8");
-  			return resultMsg;
-  		}catch (Exception e){
-  			e.printStackTrace();
-  		}finally {
-  			try {
-  				if(client!=null){
-  					client.close();
-  				}
-  				if(resp != null){
-  					resp.close();
-  				}
-  			} catch (IOException e) {
-  				e.printStackTrace();
-  			}
-  		}
-  		return null;
-  		
-  	}*/
   	
-  	
-    
+  	public static String doPost(String url, Map<String, Object> reqMap) throws Exception {
+  		HttpClient client = new HttpClient();    
+        //创建post请求方法   
+        PostMethod myPost = new PostMethod(url);    
+        //设置请求超时时间   
+        client.setConnectionTimeout(3000*1000);  
+        String responseString = null;    
+	        try{    
+	        //设置请求头部类型   
+	        
+	        myPost.setRequestHeader("Content-Type","application/json");  
+	        myPost.setRequestHeader("charset","GBK");  
+	        //设置请求体，即xml文本内容，一种是直接获取xml内容字符串，一种是读取xml文件以流的形式   
+	        
+	        JSONObject json = JSONObject.parseObject(JSON.toJSONString(reqMap));
+	        myPost.setRequestBody(json.toString());;   
+	        System.out.println("******"+myPost.toString());
+	        int statusCode = client.executeMethod(myPost);  
+	        //只有请求成功200了，才做处理
+	        if(statusCode == HttpStatus.SC_OK){    
+	        	InputStream inputStream = myPost.getResponseBodyAsStream();
+	            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream,"UTF-8"));
+	            StringBuffer stringBuffer = new StringBuffer();
+	            String str = "";
+	            while ((str = br.readLine()) != null) {
+	                stringBuffer.append(str);
+	            }
+	            responseString = stringBuffer.toString();
+	        }    
+	    }catch (Exception e) { 
+	        e.printStackTrace();    
+	    }finally{
+	    	 myPost.releaseConnection(); 
+	    }
+	    return responseString;
+  	}
 }

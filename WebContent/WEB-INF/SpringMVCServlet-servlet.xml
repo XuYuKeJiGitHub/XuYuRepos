@@ -58,6 +58,7 @@
 				<mvc:exclude-mapping path="/html/**"/> 
 				<mvc:exclude-mapping path="/images/**"/> 
 				<mvc:exclude-mapping path="/XuYuRepos/**"/> 
+				<mvc:exclude-mapping path="/wxpay/**"/> 
 	            <bean id="CommonInterceptor"
 	             class="com.xuyurepos.util.CommonInterceptor1"/>
 	        </mvc:interceptor>

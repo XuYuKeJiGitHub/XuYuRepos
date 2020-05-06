@@ -13,7 +13,7 @@ import com.xuyurepos.entity.system.SystemUser;
 public class CommonInterceptor1 extends HandlerInterceptorAdapter {
 	Logger logger = LoggerFactory.getInstance().getLogger(ActionLogInterceptor.class);
 	//配置不需要拦截的url地址
-    private static final String[] IGNORE_URI = {"register","captcha","views","login","logout","remove","select","delect","update1","wxpay","wappay","alipay","facade"};
+    private static final String[] IGNORE_URI = {"register","captcha","views","login","logout","remove","select","delect","update1","wxpay","wappay","alipay","facade","iccidmanager"};
     //在执行调用类方法之前执行的
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)

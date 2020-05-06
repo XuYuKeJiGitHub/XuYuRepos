@@ -547,8 +547,8 @@ public class SystemAnnexe implements Serializable{
 	}
 
 	public void setUnitCost(String unitCost) {
-         this.unitCost = unitCost == null ? "0" : (unitCost.equals("")  ? "0": unitCost.trim());
-        //this.unitCost = unitCost == null ? null : unitCost.trim();
+		//this.unitCost = unitCost == null ? "0" : (unitCost.equals("")  ? "0": unitCost.trim());
+        this.unitCost = unitCost == null ? null : unitCost.trim();
 	}
 
 	public String getIp() {

@@ -1,7 +1,0 @@
-package com.xuyurepos.service.manager;
-
-public interface XuyuContentCardInfoClearService {
-
-	public void clear();
-
-}
